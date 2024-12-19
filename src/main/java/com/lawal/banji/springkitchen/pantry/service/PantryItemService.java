@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Service
-public class PantryItemService {
+public final class PantryItemService {
 
     @Autowired
     private PantryItemRepo pantryItemRepo;

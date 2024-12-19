@@ -114,7 +114,7 @@ nav a {
 form {
     border: thin solid black;
     padding: 5px;
-    background: #aeacac;
+    /*background: #aeacac;*/
     height: 90%;
 }
 

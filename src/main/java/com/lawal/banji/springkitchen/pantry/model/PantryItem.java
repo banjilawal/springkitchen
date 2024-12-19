@@ -67,8 +67,8 @@ public final class PantryItem implements FoodEntity {
 
     @Override
     public void setQuantityInStock(Long quantityInStock) {
-        if (quantityInStock < 0) decreaseQuantityInStock(quantityInStock);
-        else increaseQuantityInStock(quantityInStock);
+        assert quantityInStock >= 0 : "Quantity cannot be less than 0";
+        this.quantityInStock = quantityInStock;
     }
 
     @Override

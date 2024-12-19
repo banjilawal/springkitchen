@@ -8,24 +8,21 @@
 </head>
 <body>
 <div class="dashboard" id="pantryDashboard" th:if="${dashboard == 'pantryDashboard'}">
-<!--    <h1>Food Dashboard</h1>-->
+    <h1 th:text="${#strings.isEmpty(pageHeading) ? 'Pantry Management'  : pageHeading}"></h1>
     <nav class="nav" id="pantryNav">
         <span><a th:href="@{/kitchen/pantry}">PantryHome</a></span>
         <span><a th:href="@{/kitchen/pantry/save}">Add New Pantry Item</a></span>
-        <!--        <span><a th:href="@{/admin/tasks}">Global Task List</a></span>-->
         <form id="pantrySearchForm" th:action="@{/kitchen/pantry/search}" th:method="get">
             <input type="text" name="name" placeholder="...">
             <input type="submit" value="Search">
         </form>
     </nav>
-    <h1 th:text="${#strings.isEmpty(pageHeading) ? 'Default Heading' : pageHeading}">Pantry Inventory</h1>
-    <div class="view" id="pantrySearchResultsView" th:if="${view == 'pantrySearchResultsView'}">
+    <div class="view" id="inventoryView" th:if="${view == 'inventoryView'}">
         <table>
             <thead>
             <tr>
                 <th>Id</th>
                 <th>Name</th>
-                <!--                    <th>Calories</th>-->
                 <th>Quantity In Stock</th>
                 <th>Reorder Threshold</th>
             </tr>
@@ -34,38 +31,12 @@
             <tr th:each="pantryItem: ${pantryItems}" th:onclick="|location.href='@{/kitchen/pantry/{id}(id=${pantryItem.id})}'|">
                 <td th:text="${pantryItem.id}"></td>
                 <td th:text="${pantryItem.name}"></td>
-                <!--                    <td th:text="${pantryItem.calories}"></td>-->
                 <td th:text="${pantryItem.quantityInStock}"></td>
                 <td th:text="${pantryItem.reorderLevel}"></td>
             </tr>
             </tbody>
         </table>
     </div>
-    <div class="view" id="inventoryView" th:if="${view == 'inventoryView'}">
-<!--        <h1 th:text="${#strings.isEmpty(pageHeading) ? 'Default Heading' : pageHeading}">Pantry Inventory</h1>-->
-<!--        <p><span th:text="${message}"></span></p>-->
-        <table>
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Name</th>
-<!--                    <th>Calories</th>-->
-                    <th>Quantity In Stock</th>
-                    <th>Reorder Threshold</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="pantryItem: ${pantryItems}" th:onclick="|location.href='@{/kitchen/pantry/{id}(id=${pantryItem.id})}'|">
-                    <td th:text="${pantryItem.id}"></td>
-                    <td th:text="${pantryItem.name}"></td>
-<!--                    <td th:text="${pantryItem.calories}"></td>-->
-                    <td th:text="${pantryItem.quantityInStock}"></td>
-                    <td th:text="${pantryItem.reorderLevel}"></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
     <div class="view" id="pantryItemView" th:if="${view == 'pantryItemView'}">
         <table id="pantryItemTable">
             <thead>
@@ -91,12 +62,13 @@
             </fieldset>
             <fieldset>
                 <label for="name">Name</label>
-                <input type="text" id="name" name="name" required th:field="*{name}">
+                <input type="text" id="name" name="name" required th:field="*{name}" th:attr="readonly=${id != null ? 'readonly' : null}" >
 <!--                <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>-->
             </fieldset>
             <fieldset>
                 <label for="quantityInStock">Quantity In Stock</label>
-                <input type="number" name="quantityInStock" id="quantityInStock" required th:field="*{quantityInStock}">
+                <input
+                    type="number" name="quantityInStock" id="quantityInStock" required th:field="*{quantityInStock}">
 <!--                <p th:if="${#fields.hasErrors('quantityInStock')}" th:errors="*{quantityInStock}"></p>-->
             </fieldset>
             <fieldset>
@@ -108,6 +80,26 @@
                 <input type="submit" value="Save">
             </fieldset>
         </form>
+    </div>
+    <div class="view" id="deletePantryItemView" th:if="${view == 'deletePantryItemView'}">
+        <p class="warning" th:text="${#strings.isEmpty(warningMessage) ? 'Deletion removes all items referencing the item' : warningMessage}"></p>
+        <form
+            id="deletePantryItemForm"
+            th:action="@{/kitchen/pantry/delete/{id}(id=${pantryItem.id})}"
+            th:method="post"
+            th:object="${pantryItem}"
+        >
+            <label for="pantryItemDeleteTargetId">ID
+                <input type="text" id="pantryItemDeleteTargetId" readonly th:field="*{id}">
+            </label>
+            <fieldset class="actionGroup">
+                <nav class="actionNav" id="deleteTaskActionNav">
+                    <a class="cancel" th:href="@{/kitchen/pantry/{id}(id=*{id})}" th:text="${'Do not Delete'}"></a>
+                    <input type="submit" class="delete" id="deleteTaskButton" value="Delete Now">
+                </nav>
+            </fieldset>
+        </form>
+        <!--end deleteTaskView-->
     </div>
 </div>
 
