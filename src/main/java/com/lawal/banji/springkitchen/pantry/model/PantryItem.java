@@ -1,8 +1,11 @@
 package com.lawal.banji.springkitchen.pantry.model;
 
+import com.lawal.banji.springkitchen.pantry.data.PantryItemDTO;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+
+import java.util.Objects;
 
 @Entity
 public final class PantryItem implements FoodEntity {
@@ -14,7 +17,6 @@ public final class PantryItem implements FoodEntity {
     private String name;
 
     @Column(nullable = false)
-
     private Long quantityInStock;
 
     @Column(nullable = false)
@@ -23,13 +25,18 @@ public final class PantryItem implements FoodEntity {
     public PantryItem() {}
 
     public PantryItem(Builder builder) {
-//        this.id = builder.id;
+        this.id = builder.id;
         this.name = builder.name;
         this.quantityInStock = builder.quantityInStock;
         this.reorderLevel = builder.reorderLevel;
     }
 
     public PantryItem(String name, Long quantityInStock, Long reorderLevel) {
+        this(null, name, quantityInStock ,reorderLevel);
+    }
+
+    public PantryItem(Long id, String name, Long quantityInStock, Long reorderLevel) {
+        this.id = id;
         this.name = name;
         this.quantityInStock = quantityInStock;
         this.reorderLevel = reorderLevel;
@@ -89,12 +96,30 @@ public final class PantryItem implements FoodEntity {
     }
 
     @Override
+    public PantryItemDTO toDTO() {
+        return new PantryItemDTO(this.id, this.name, this.quantityInStock, this.reorderLevel);
+    }
+
+    @Override
+    public void update(PantryItemDTO pantryItemDTO) {
+//        this.id = pantryItemDTO.getId();
+        this.name = pantryItemDTO.getName();
+        this.quantityInStock = pantryItemDTO.getQuantityInStock();
+        this.reorderLevel = pantryItemDTO.getReorderLevel();
+    }
+
+    @Override
     public boolean equals(Object object) {
         if (object == this) return true;
         if (object == null) return false;
         if (object instanceof PantryItem pantryItem)
             return id.equals(pantryItem.getId()) && name.equalsIgnoreCase(pantryItem.getName());
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getName(), getQuantityInStock(), getReorderLevel());
     }
 
     @Override

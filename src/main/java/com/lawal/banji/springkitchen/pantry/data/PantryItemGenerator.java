@@ -7,6 +7,9 @@ import java.util.Random;
 import java.util.Set;
 
 public class PantryItemGenerator {
+
+    private static final Long minReorderLevel = 10L;
+    private static final Long maxReorderLevel = 25L;
     private static final Random random = new Random();
 
     public static String name () {
@@ -57,18 +60,26 @@ public class PantryItemGenerator {
             .build();
     }
 
-    public static PantryItemDTO pantryItemDTO(Long minLevel, Long maxLevel) {
-        Long reorderLevel = reorderLevel(minLevel, maxLevel);
+    public static PantryItemDTO pantryItemDTO() {
+        Long reorderLevel = reorderLevel(minReorderLevel, maxReorderLevel);
         return new PantryItemDTO(null, name(), quantityInStock(reorderLevel), reorderLevel);
     }
 
-    public static Set<PantryItem> pantryItems (int numberOfItems, Long minReorderLevel, Long maxReorderLevel) {
-        Set<PantryItem> pantryItems = new HashSet<>();
-        for (int i = 0; i < numberOfItems; i++) {
-            PantryItem pantryItem = pantryItem(minReorderLevel, maxReorderLevel);
-            System.out.println("adding to set: " + pantryItem);
-            pantryItems.add(pantryItem);
+    public static PantryItemDTO foundPantryItemDTO (Set<PantryItemDTO> dtos, String name) {
+        for (PantryItemDTO dto : dtos) {
+            if (dto.getName().equalsIgnoreCase(name)) return dto;
         }
-        return pantryItems;
+        return null;
+    }
+
+    public static Set<PantryItemDTO> pantryItemDTOs (int numberOfItems, Long minReorderLevel, Long maxReorderLevel) {
+        Set<PantryItemDTO> dtos = new HashSet<>();
+        for (int i = 0; i < numberOfItems; i++) {
+            String name = name();
+            while (foundPantryItemDTO(dtos, name) != null) { name = name(); }
+            Long reorderLevel = reorderLevel(minReorderLevel, maxReorderLevel);
+            dtos.add(new PantryItemDTO(null, name, quantityInStock(reorderLevel), reorderLevel));
+        }
+        return dtos;
     }
 }

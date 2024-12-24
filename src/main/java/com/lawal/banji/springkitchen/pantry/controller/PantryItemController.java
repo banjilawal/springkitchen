@@ -4,30 +4,25 @@ import com.lawal.banji.springkitchen.pantry.data.PantryItemDTO;
 import com.lawal.banji.springkitchen.pantry.data.PantryItemGenerator;
 import com.lawal.banji.springkitchen.pantry.model.PantryItem;
 import com.lawal.banji.springkitchen.pantry.service.PantryItemService;
+
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping({"/kitchen/pantry"})
-public class PantryItemController {
+public final class PantryItemController {
 
-    private PantryItemService pantryItemService;
+    private final PantryItemService pantryItemService;
 
     @Autowired
     public PantryItemController(PantryItemService pantryItemService) {
         this.pantryItemService = pantryItemService;
     }
-
-    public PantryItemService getPantryItemService() {
-        return pantryItemService;
-    }
-
-    @Autowired
-    public void setPantryItemService(PantryItemService pantryItemService) { this.pantryItemService = pantryItemService; }
 
     @ModelAttribute
     public void setModelAttributes(Model model) { model.addAttribute("dashboard", "pantryDashboard"); }
@@ -40,16 +35,16 @@ public class PantryItemController {
         return "kitchen";
     }
 
-    @GetMapping({"/search"})
-    public String searchPantryItems(Model model, @RequestParam(value = "name", required = false) String name) {
-        model.addAttribute("pantryItems", pantryItemService.search(name));
+    @GetMapping("/search")
+    public String searchPantryItems(Model model, @RequestParam(value = "string", required = false) String string) {
+        model.addAttribute("pantryItems", pantryItemService.search(string));
         model.addAttribute("view", "inventoryView");
         model.addAttribute("pageHeading", "Search Results");
         return "kitchen";
     }
 
     @GetMapping("/{id}")
-    public String getPantryItemById (Model model, @PathVariable Long id) {
+    public String getPantryItem(Model model, @PathVariable Long id) {
         PantryItem pantryItem = pantryItemService.findById(id);
         if (pantryItem == null) { return "redirect:/kitchen/pantry";}
 
@@ -58,68 +53,91 @@ public class PantryItemController {
         return "kitchen";
     }
 
-    @GetMapping("/save")
-    public String showPantryItemForm(Model model, @RequestParam(value = "id", required = false) Long id) {
-        PantryItemDTO pantryItemDTO;
-        if (id != null) {
-            PantryItem pantryItem = pantryItemService.findById(id);
-            pantryItemDTO = new PantryItemDTO(id, pantryItem.getName(), pantryItem.getQuantityInStock(), pantryItem.getReorderLevel());
-        } else {
-            pantryItemDTO = PantryItemGenerator.pantryItemDTO(10L, 25L);
-            while (pantryItemService.findByName(pantryItemDTO.getName()) != null) {
-                pantryItemDTO = PantryItemGenerator.pantryItemDTO(10L, 25L);
-            }
-        }
-        model.addAttribute("pantryItemDTO", pantryItemDTO);
+    @GetMapping("/new")
+    public String newPantryItemForm(Model model) {
+        model.addAttribute("pantryItemDTO", PantryItemGenerator.pantryItemDTO());
         model.addAttribute("view", "pantryItemFormView");
         model.addAttribute("pageHeading", "Pantry Item Form");
         return "kitchen";
     }
 
-    @PostMapping("/save")
-    public String savePantryItem(Model model, @Valid @ModelAttribute("pantryItemDTO") PantryItemDTO pantryItemDTO) {
-
-        if (pantryItemDTO.getId() != null) {
-            pantryItemService.update(pantryItemDTO.getId(), pantryItemDTO);
-            model.addAttribute("pantryItem", pantryItemDTO);
-            model.addAttribute("view", "pantryItemView");
-            return "redirect:/kitchen/pantry/" + pantryItemDTO.getId();
-        } else {
-            pantryItemService.save(new PantryItem(pantryItemDTO.getName(), pantryItemDTO.getQuantityInStock(), pantryItemDTO.getReorderLevel()));
-            model.addAttribute("pantryItems", pantryItemService.findAll());
-            model.addAttribute("view", "inventoryView");
-            return "redirect:/kitchen/pantry";
+    @PostMapping("")
+    public String createPantryItem(
+        @Valid @ModelAttribute("pantryItemDTO") PantryItemDTO pantryItemDTO,
+        BindingResult bindingResult,
+        Model model
+    ) {
+        if (bindingResult.hasErrors()) {
+            if (pantryItemDTO == null) { return showErrors(model, "pantryItemDTO is null. Creation failed."); }
+            model.addAttribute("view", "pantryItemFormView");
+            model.addAttribute("pageHeading", "Pantry Item Form");
+            return "kitchen";
         }
-    }
-
-    @GetMapping("/save/{id}")
-    public String showUpdatePantryItemForm (Model model, @PathVariable Long id) { return showPantryItemForm(model, id); }
-
-    @GetMapping("/delete/{id}")
-    public String showDeletePantryItemForm (Model model, @PathVariable Long id) {
-        PantryItem pantryItem = pantryItemService.findById(id);
-        if (pantryItem == null) { return "redirect:/pantry"; }
-        model.addAttribute("pantryItem", pantryItem);
-
-        String warningMessage = "Deleting this item will also delete all recipes that use it. "
-            + pantryItem.getName() + " will be removed from all current and past grocery lists. "
-            + "Click \"Yes I Want to Delete\" or \"Cancel\" to return to the item's page.";
-        model.addAttribute("view", "deletePantryItemView");
-        model.addAttribute("pageHeading", "Delete " + pantryItem.getName());
-        model.addAttribute("warningMessage", warningMessage);
-        return "kitchen";
-    }
-
-    @PostMapping("/delete/{id}")
-    public String deletePantryItem (Model model, @PathVariable Long id) {
-        PantryItem pantryItem = pantryItemService.findById(id);
-        if (pantryItem == null) {
-            System.out.println("PantryItem is null");
-            return "redirect:/kitchen/pantry";
-        }
-        pantryItemService.deleteById(id);
+        pantryItemService.save(pantryItemDTO);
         model.addAttribute("pantryItems", pantryItemService.findAll());
         model.addAttribute("view", "inventoryView");
         return "redirect:/kitchen/pantry";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String editPantryItemForm(Model model, @PathVariable Long id) {
+        PantryItem pantryItem = pantryItemService.findById(id);
+        if (pantryItem == null) { return showErrors(model, "The pantry item does not exist. Update failed."); }
+
+        model.addAttribute("pantryItemDTO", pantryItem.toDTO());
+        model.addAttribute("view", "pantryItemFormView");
+        model.addAttribute("pageHeading", "Update Pantry Item");
+        return "kitchen";
+    }
+
+    @PostMapping("/{id}")
+    public String updatePantryItem(
+        @PathVariable Long id,
+        @ModelAttribute("pantryItemDTO") PantryItemDTO pantryItemDTO,
+        BindingResult bindingResult,
+        Model model
+    ) {
+        PantryItem pantryItem = pantryItemService.findById(id);
+        if (bindingResult.hasErrors()) {
+            if (pantryItem == null) { return showErrors(model, "The pantry item does not exist. Update failed."); }
+
+            model.addAttribute("view", "pantryItemFormView");
+            model.addAttribute("pageHeading", "Update Pantry Item");
+            return "kitchen"; // Re-render the form with validation errors
+        }
+        model.addAttribute("pantryItem", pantryItemService.update(id, pantryItemDTO));
+        model.addAttribute("view", "pantryView");
+        return "redirect:/kitchen/pantry/"  + id;
+    }
+
+    @GetMapping("/{id}/delete")
+    public String deletePantryItemForm(Model model, @PathVariable Long id) {
+        PantryItem pantryItem = pantryItemService.findById(id);
+        if (pantryItem == null) { return itemNotFound(model); }
+        model.addAttribute("pantryItem", pantryItem);
+        model.addAttribute("view", "deletePantryItemView");
+        return "kitchen";
+    }
+
+    @PostMapping("/{id}/delete")
+    public String deletePantryItem(Model model, @PathVariable Long id) {
+        pantryItemService.deleteById(id);
+
+        model.addAttribute("pantryItems", pantryItemService.findAll());
+        model.addAttribute("view", "inventoryView");
+        return "kitchen";
+    }
+
+    @GetMapping("/notfound")
+    public String itemNotFound(Model model) {
+        model.addAttribute("view", "notFoundView");
+        return "kitchen";
+    }
+
+    @GetMapping("/error")
+    public String showErrors(Model model, String errorMessage) {
+        model.addAttribute("errorMessage", errorMessage);
+        model.addAttribute("view", "errorView");
+        return "kitchen";
     }
 }

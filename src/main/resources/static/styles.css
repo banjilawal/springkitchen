@@ -13,54 +13,48 @@ h1 {
     font-size: 3vw;
 }
 
+@media (max-width: 600px) {
+    table {
+        max-width: 90%; /* Allow the table to be up to 90% of the screen on small devices */
+    }
+}
+
 /* Table */
 table {
+    width: 100%;
+    margin: 50px auto;
+    /*max-width: 45%;*/
+    table-layout: auto;
+    padding: 5px;
+    horiz-align: center;
+    vertical-align: center;
     border: thin dashed black;
-    width: 98%;
-    text-align: center;
-    horiz-align: left;
-    vertical-align: top;
     border-collapse: collapse;
-}
-th, td {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 8px;
-    border: 1px;
-    vertical-align: top;
-}
-td * { margin: 0; }
-tr { height: auto; }
-/*td { vertical-align: middle; padding: 5px; }*/
-th { background-color: lightgrey; }
-tr:hover {background-color: #ffcebf;}
-tr td {border-bottom: 1px #cecccc dashed; border-left: 1px black dashed;}
-
-.actionCell {
-    text-align: center;
-    vertical-align: top;
-    padding: 5px;
-}
-.actionCellNav {
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    background: #dff4f9;
-    border-color: #dae9ee;
-    justify-content: center;
-    gap: 5px;
-}
-.actionCellNav a {
-    margin:  0px;
-    padding:  5px 10px;
-    width: auto;
-    display: inline-block;
-    text-align: center;
-    vertical-align: top;
+    height: auto;
+    tr {
+        /*height: auto;*/
+        :hover { background-color: #ffcebf; }
+        /*td {*/
+            border-bottom: 1px #cecccc dashed;
+            border-left: 1px black dashed;
+    }
+    /*}*/
+    /*tbody {*/
+    /*    td {*/
+    /*        text-align: left;*/
+    /*        width: 100%;*/
+    /*    }*/
+    /*}*/
+    th {
+        background-color: lightgrey;
+        td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
 }
 
-/* Nav */
 nav {
     text-align: center;
     vertical-align: center;
@@ -75,25 +69,27 @@ nav {
     display: flex;
     justify-content: center;
     gap: 10px;
-}
-
-nav a {
-    text-decoration: none;
-    background-color: #0f0f0f;
-    color: white;
-    padding: 20px;
-    border-color: #7df008;
-    border-style: inset;
-    border-radius: 15px;
+    a {
+        text-decoration: none;
+        background-color: #0f0f0f;
+        color: white;
+        padding: 20px;
+        border-color: #7df008;
+        border-style: inset;
+        border-radius: 15px;
+    }
 }
 
 .submitButton{
     text-decoration: none;
-    background-color: #0f0f0f;
-    color: white;
+    background-color: #19ad19;
+    color: black;
     padding: 20px;
-    border-color: #7df008;
+    font-size: 16px;
+    font-weight: bold;
+    border-color: #b13910;
     border-style: inset;
+    border-width: 3px;
     border-radius: 15px;
 }
 
@@ -108,13 +104,10 @@ nav a {
     border-radius: 15px;
 }
 
-
-
-/* Form */
 form {
     border: thin solid black;
     padding: 5px;
-    /*background: #aeacac;*/
+    background: #aeacac;
     height: 90%;
 }
 
@@ -123,31 +116,14 @@ form {
     background: #aeacac;
 }
 
-/* List */
-.horizontalList {
-    list-style: none;
-    margin: 0px;
-    padding: 0px;
-    display: flex;
-}
-.horizontalListItem { padding: 10px; border-radius: 5px; margin: 5px; }
-
-.view {
-    height: 98%;
-}
-
 .deletionLink {
     text-decoration: none;
     background-color: #870026;
     color: white;
 }
 
-.courseNumber {
-    width: 100%;
-}
-.courseDescription {
-    text-align: left;
-    text-wrap: auto;
-    align: left;
-    vertical-align: top;
+.warning {
+    font-size: 20px;
+    font-weight: bold;
+    color: #980909;
 }
