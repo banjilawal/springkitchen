@@ -1,182 +1,231 @@
 package com.lawal.banji.springkitchen.recipe.model;
 
-import com.lawal.banji.springkitchen.recipe.dto.StepDTO;
 import jakarta.persistence.*;
 
-import java.util.HashSet;
+import jakarta.validation.constraints.NotBlank;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
-public final class Step {
+@Table(name = "steps")
+public class Step {
+
+    /* String constants */
+    public static final String STEP_UPDATE_SOURCE_CANNOT_BE_NULL = "Update source is null. Update failed";
+    public static final String INVALID_UPDATE_SOURCE_ID = "Update source id is invalid. Update failed";
+    public static final String STEP_INGREDIENT_AMOUNT_CANNOT_BE_NEGATIVE = "Ingredient cannot be null or blank";
+    public static final String STEP_DIRECTIONS_CANNOT_BE_NULL_OR_BLANK = "Directions cannot be null or blank";
+    public static final String STEP_DURATION_CANNOT_BE_NEGATIVE = "Duration minutes cannot be negative";
+
+    /* logger */
+    private static final Logger logger = LoggerFactory.getLogger(Step.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(nullable = false)
+    @NotBlank(message = STEP_DIRECTIONS_CANNOT_BE_NULL_OR_BLANK)
     private String directions;
 
+
     @Column(nullable = true)
-    private Long minutesDuration;
+    private Long durationMinutes;
 
-    @ManyToMany(mappedBy = "steps")
-    Set<Recipe> recipes;
+    @Column(nullable = true)
+    private Double ingredientAmount;
 
-    public Step() { this(null, null, null);}
+    /* Bidirectional fields */
+    @ManyToOne
+    @JoinColumn(name = "recipe_id")
+    private Recipe recipe;
 
-    public Step(Builder builder) {
-        this(builder.id, builder.directions, builder.minutesDuration);
-    }
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "ingredient_id")
+    private Ingredient ingredient;
 
-    public Step(Long id, String directions, Long minutesDuration) {
+    /* Constructors */
+    public Step() {}
+
+    public Step(
+        Long id,
+        Recipe recipe,
+        Ingredient ingredient,
+        Double ingredientAmount,
+        String directions,
+        Long durationMinutes
+    ) {
         this.id = id;
-        this.directions = directions;
-        this.minutesDuration = minutesDuration;
-        this.recipes = new HashSet<>();
+        setRecipe(recipe);
+        setIngredient(ingredient);
+        setIngredientAmount(ingredientAmount);
+
+        setDirections(directions);
+        setDurationMinutes(durationMinutes);
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getDirections() {
-        return directions;
-    }
-
-    public Long getMinutesDuration() {
-        return minutesDuration;
-    }
-
-    public Set<Recipe> getRecipes () {
-        return recipes;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setDirections(String instruction) {
-        this.directions = instruction;
-    }
-
-    public void setMinutesDuration(Long minutes) {
-        this.minutesDuration = minutes;
-    }
-
-    public void setRecipes(Set<Recipe> otherRecipes) {
-        clearRecipes();
-        for (Recipe recipe : otherRecipes) {
-            if (findRecipeById(recipe.getId()) == null) this.recipes.add(recipe);
-        }
-    }
-
-    public void clearRecipes() { this.recipes = new HashSet<>(); }
-
-    public Recipe findRecipeTitle (String title) {
-        for (Recipe recipe : this.recipes) {
-            if (recipe.getTitle().equalsIgnoreCase(title)) {
-                return recipe;
-            }
-        }
-        return null;
-    }
-
-    public void addRecipe(Recipe recipe) {
-        if (findRecipeById(recipe.getId()) == null) this.recipes.add(recipe);
-        recipe.getSteps().add(this);
-    }
-
-    public void removeRecipe(Recipe recipe) {
-        if (findRecipeById(recipe.getId()) != null) this.recipes.remove(recipe);
-        recipe.getSteps().remove(this);
-    }
-
-    public Recipe findRecipeById (Long id) {
-        for (Recipe recipe : this.recipes) {
-            if (recipe.getId().equals(id)) { return recipe; }
-        }
-        return null;
-    }
-
-    public Set<Recipe> searchRecipes (String string) {
-        Set<Recipe> recipes = new HashSet<>();
-        string = string.toLowerCase();
-        for (Recipe recipe : this.recipes) {
-            if (recipe.getTitle().toLowerCase().contains(string) ||
-                recipe.getDescription().toLowerCase().contains(string)
-            ) {
-                recipes.add(recipe);
-            }
-        }
-        return recipes;
-    }
-
-    public StepDTO toDTO() {
-        return new StepDTO(this.id, this.directions, this.minutesDuration);
-    }
-
-    public void update (StepDTO stepDTO) {
-        this.id = stepDTO.getId();
-        this.directions = stepDTO.getDirections();
-        this.minutesDuration = stepDTO.getMinutesDuration();
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (object == this) return true;
-        if (object == null) return false;
-        if (object instanceof Step step)
-            return id.equals(step.getId())
-                && directions.equalsIgnoreCase(step.getDirections())
-                && minutesDuration.equals(step.getMinutesDuration());
-        return false;
-    }
-
-    @Override
-    public int hashCode() { return Objects.hash(id); }
-
-    @Override
-    public String toString () {
-        return "Step Detail[id:" +  id + " minutes:" + minutesDuration.toString()  + " directions:" + directions + "]";
-    }
-
-    public String recipesToString() {
-        StringBuilder stringBuilder = new StringBuilder("Recipes:\n");
-        int counter = 1;
-        for (Recipe recipe: this.recipes) {
-            stringBuilder.append(counter).append(" ").append(recipe.toString()).append("\n");
-            counter++;
-        }
-        return stringBuilder.toString();
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
+    /* Builders */
+    public static Builder builder () { return new Builder(); }
 
     public static class Builder {
         private Long id;
+        private Recipe recipe;
+        private Ingredient ingredient;
+        private Double ingredientAmount;
         private String directions;
-        private Long minutesDuration;
+        private Long durationMinutes;
 
-        public Builder id(Long id) {
+        public Builder setId(Long id) {
             this.id = id;
             return this;
         }
 
-        public Builder directions(String directions) {
+        public Builder setRecipe(Recipe recipe) {
+            this.recipe = recipe;
+            return this;
+        }
+
+        public Builder setIngredient(Ingredient ingredient) {
+            this.ingredient = ingredient;
+            return this;
+        }
+
+        public Builder setIngredientAmount(Double ingredientAmount) {
+            this.ingredientAmount = ingredientAmount;
+            return this;
+        }
+
+        public Builder setDirections(String directions) {
             this.directions = directions;
             return this;
         }
 
-        private Builder minutesDuration(Long minutesDuration) {
-            this.minutesDuration = minutesDuration;
+        public Builder setDurationMinutes(Long durationMinutes) {
+            this.durationMinutes = durationMinutes;
             return this;
         }
 
-        public Step build () {
-            return new Step(this);
+        public Step build() {
+            return new Step(id, recipe, ingredient, ingredientAmount, directions, durationMinutes);
         }
+    }
+
+    /* Getters */
+    public Long getId() {
+        return id;
+    }
+
+    public Recipe getRecipe() { return recipe; }
+
+    public Ingredient getIngredient() { return ingredient; }
+
+    public Double getIngredientAmount() { return ingredientAmount; }
+
+    public String getDirections() { return directions; }
+
+    public Long getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    /* Setters */
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setRecipe(Recipe recipe) {
+        if (recipe == this.recipe) return;
+        if (recipe != null) recipe.addStep(this);
+        if (this.recipe != null) this.recipe.removeStep(this);
+        this.recipe = recipe;
+    }
+
+    public void setIngredient(Ingredient ingredient) {
+        if (ingredient == this.ingredient) return;
+        if (ingredient != null) ingredient.addStep(this);
+        if (this.ingredient != null) this.ingredient.removeStep(this);
+        this.ingredient = ingredient;
+    }
+
+    public void setIngredientAmount(Double ingredientAmount) {
+        if (ingredientAmount != null && ingredientAmount < 0)
+            loggingExceptionHandler(STEP_INGREDIENT_AMOUNT_CANNOT_BE_NEGATIVE);
+        else { this.ingredientAmount = ingredientAmount; }
+    }
+
+    public void setDirections(String directions) {
+        if (directions == null || directions.trim().isBlank())
+            loggingExceptionHandler(STEP_DIRECTIONS_CANNOT_BE_NULL_OR_BLANK);
+        else { this.directions = directions.trim(); }
+    }
+
+    public void setDurationMinutes(Long minutesDuration) {
+        if (minutesDuration != null && minutesDuration < 0)
+            loggingExceptionHandler(STEP_DURATION_CANNOT_BE_NEGATIVE);
+        else { this.durationMinutes = minutesDuration; }
+    }
+
+    /* Update methods */
+    public void getUpdate(Step source) {
+        if (source == this) return;
+
+        if (source == null)
+            loggingExceptionHandler(STEP_UPDATE_SOURCE_CANNOT_BE_NULL);
+        else if (source.getDurationMinutes() < 0)
+            loggingExceptionHandler(STEP_DURATION_CANNOT_BE_NEGATIVE);
+        else if (source.getId() == null || !id.equals(source.getId()))
+            loggingExceptionHandler(INVALID_UPDATE_SOURCE_ID);
+        else if (source.getDirections() == null || source.getDirections().trim().isEmpty())
+            loggingExceptionHandler(STEP_DIRECTIONS_CANNOT_BE_NULL_OR_BLANK);
+        else {
+            setDirections(source.getDirections());
+            setDurationMinutes(source.getDurationMinutes());
+
+            setRecipe(source.getRecipe());
+            setIngredient(source.getIngredient());
+            setIngredientAmount(source.getIngredientAmount());
+        }
+    }
+
+    /* Equals and hash methods */
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null) return false;
+        if (object instanceof Step step) {
+            boolean idEqual = id != null && step.getId() != null && id.equals(step.getId());
+            boolean directionsEqual = directions != null && step.getDirections() != null
+                &directions.equalsIgnoreCase(step.directions);
+            return idEqual && directionsEqual;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() { return id != null ? Objects.hash(id) : Objects.hash(directions); }
+
+    /* String methods */
+    @Override
+    public String toString () {
+        String durationString = durationMinutes == null ? "minutes:" : durationMinutes + "";
+        return getClass().getSimpleName() + "[id:" + id + " " + directionStringHandler() + durationString + "]";
+    }
+
+    /* Nicely combines the ingredient, it's amount and the expected duration into a single string  */
+    public String directionStringHandler () {
+        String ingredientString = ingredient == null ? "" : ingredient.getName();
+        String ingredientAmountString = ingredientAmount == null ? "" : "amount:" + ingredientAmount;
+
+        int firstWhiteSpaceLocation = directions.indexOf(" ");
+        if (ingredient == null || ingredientAmount == null || firstWhiteSpaceLocation == -1) return directions;
+        return directions.substring(0, firstWhiteSpaceLocation + 1) + ingredientAmountString + " " + ingredientString +
+            directions.substring(firstWhiteSpaceLocation + 1);
+    }
+
+    /* logging methods */
+    public void loggingExceptionHandler (String errorMessage) {
+        logger.error(errorMessage);
+        throw new IllegalArgumentException(errorMessage);
     }
 }

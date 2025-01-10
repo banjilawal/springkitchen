@@ -1,14 +1,25 @@
-package com.lawal.banji.springkitchen.recipe.data;
+package com.lawal.banji.springkitchen.seeder;
 
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
+import com.lawal.banji.springkitchen.recipe.service.RecipeService;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Random;
 
-public class RecipeGenerator {
+@Service
+public class RecipeSeederService {
 
-    private static AtomicLong nextId = new AtomicLong(0);
-    private static Random random = new Random();
+    private static final Random random = new Random();
+
+    @Autowired
+    private RecipeService recipeService;
+
+    @Autowired
+    public RecipeSeederService(RecipeService recipeService) {
+        this.recipeService = recipeService;
+    }
 
     public static String description () {
         String[] descriptions = {
@@ -138,45 +149,21 @@ public class RecipeGenerator {
             "Stuffed Cabbage Rolls", "Beef Wellington", "Chicken Katsu", "Roasted Brussels Sprouts",
             "Vegetable Tempura", "Mango Chicken Salad", "Garlic Parmesan Chicken", "Veggie Burgers",
             "Roasted Red Pepper Hummus", "Falafel Wraps", "Spinach Artichoke Dip", "Coconut Shrimp",
-
         };
         return titles[random.nextInt(titles.length)];
     }
 
-    public static Recipe findDescription (Set<Recipe> recipes, String description) {
-        for (Recipe recipe : recipes) {
-            if (recipe.getDescription().equalsIgnoreCase(description)) {
-                System.out.println(recipe.toString() + " already has description");
-                return recipe;
-            }
+    @Transactional
+    public void seed(int numberOfRecipes) {
+        String title = title();
+        String description = description();
+        for (int i = 0; i < numberOfRecipes; i++) {
+            while (recipeService.findByTitle(title) == null) title = title();
+            while (recipeService.findByDescription(description) == null) description = description();
+            Recipe recipe = new Recipe(null, title, description);
+            recipeService.save(recipe);
+            System.out.println("Created Recipe: " + recipe + "\ntotal recipes = " + recipeService.count());
         }
-        return null;
     }
 
-    public static Recipe findTitle (Set<Recipe> recipes, String title) {
-        for (Recipe recipe : recipes) {
-            if (recipe.getTitle().equalsIgnoreCase(title)) {
-                System.out.println(recipe.toString() + " already has title");
-                return recipe;
-            }
-        }
-        return null;
-    }
-
-    public static Recipe recipe () {
-        return new Recipe(nextId.incrementAndGet(), title(), description());
-    }
-
-    public static Set<Recipe> recipes (int number) {
-        Set<Recipe> recipes = new HashSet<>();
-        for (int i = 0; i < number; i++) {
-            String title = title();
-            String description = description();
-            while (findTitle(recipes, title) != null) { title = title(); }
-            while (findDescription(recipes, description()) != null) { description = description(); }
-            recipes.add(new Recipe(nextId.incrementAndGet(), title, description));
-            System.out.println("Recipe added: " + recipes.size());
-        }
-        return recipes;
-    }
 }
