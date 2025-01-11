@@ -1,8 +1,8 @@
 package com.lawal.banji.springkitchen.search;
 
+import com.lawal.banji.springkitchen.food.Food;
 import com.lawal.banji.springkitchen.pantry.PantryItem;
 import com.lawal.banji.springkitchen.pantry.PantryItemService;
-import com.lawal.banji.springkitchen.recipe.model.Ingredient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +25,10 @@ public class PantryIngredientSearchService {
 
     /* Search methods */
     @Transactional(readOnly = true)
-    Set<PantryItem> searchForIngredient (Ingredient ingredient) {
-        if (ingredient == null || ingredient.getName() == null || ingredient.getName().trim().isBlank()) {
+    Set<PantryItem> searchForIngredient (Food food) {
+        if (food == null || food.getName() == null || food.getName().trim().isBlank()) {
             return Collections.emptySet();
-        } else { return pantryItemService.search(ingredient.getName()); }
+        } else { return pantryItemService.search(food.getName()); }
     }
 
     /* Create methods */

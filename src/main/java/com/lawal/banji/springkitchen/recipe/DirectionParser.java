@@ -13,19 +13,19 @@
 //        this.instruction = instruction;
 //    }
 //
-//    public Ingredient getIngredient() {
+//    public Food getIngredient() {
 //        return extractIngredients(instruction).get(0);
 //    }
 //
 //    public Long getMinutesDuration () {
 //
 //    }
-//    public static class Ingredient {
+//    public static class Food {
 //        private String quantity;
 //        private String unit;
 //        private String name;
 //
-//        public Ingredient(String quantity, String unit, String name) {
+//        public Food(String quantity, String unit, String name) {
 //            this.quantity = quantity;
 //            this.unit = unit;
 //            this.name = name;
@@ -33,12 +33,12 @@
 //
 //        @Override
 //        public String toString() {
-//            return String.format("Ingredient{quantity='%s', unit='%s', name='%s'}", quantity, unit, name);
+//            return String.format("Food{quantity='%s', unit='%s', name='%s'}", quantity, unit, name);
 //        }
 //    }
 //
-//    public static List<Ingredient> extractIngredients(String instruction) {
-//        List<Ingredient> ingredients = new ArrayList<>();
+//    public static List<Food> extractIngredients(String instruction) {
+//        List<Food> ingredients = new ArrayList<>();
 //
 //        // Pattern to match quantities with units and ingredients
 //        Pattern pattern = Pattern.compile("(\\d+(?:\\.\\d+)?)?\\s*(g|ml|tbsp|(?:chicken\\s)?breasts|(?:cherry\\s)?tomatoes|cucumber|potatoes|egg)\\s*");
@@ -57,11 +57,11 @@
 //                Matcher ingredientMatcher = Pattern.compile("([a-zA-Z\\s]+?)(?=\\s*(?:,|and|\\.|$))").matcher(remainingText);
 //                if (ingredientMatcher.find()) {
 //                    String ingredientName = ingredientMatcher.group(1).trim();
-//                    ingredients.add(new Ingredient(quantity, unitOrIngredient, ingredientName));
+//                    ingredients.add(new Food(quantity, unitOrIngredient, ingredientName));
 //                }
 //            } else {
 //                // Case where the ingredient doesn't have a separate unit
-//                ingredients.add(new Ingredient(quantity, "", unitOrIngredient));
+//                ingredients.add(new Food(quantity, "", unitOrIngredient));
 //            }
 //        }
 //

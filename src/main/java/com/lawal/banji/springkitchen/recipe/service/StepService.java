@@ -1,6 +1,6 @@
 package com.lawal.banji.springkitchen.recipe.service;
 
-import com.lawal.banji.springkitchen.recipe.model.Ingredient;
+import com.lawal.banji.springkitchen.food.Food;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
 import com.lawal.banji.springkitchen.recipe.repo.StepRepo;
 import com.lawal.banji.springkitchen.recipe.model.Step;
@@ -69,9 +69,9 @@ public class StepService {
     }
 
     @Transactional(readOnly = true)
-    public Set<Step> filterByIngredient(Ingredient ingredient) {
+    public Set<Step> filterByIngredient(Food food) {
         return stepRepo.findAll().stream()
-                .filter(step -> step.getIngredient().equals(ingredient))
+                .filter(step -> step.getIngredient().equals(food))
                 .collect(Collectors.toSet());
     }
 

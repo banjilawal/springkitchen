@@ -1,10 +1,10 @@
 package com.lawal.banji.springkitchen.seeder;
 
 import com.lawal.banji.springkitchen.dataset.StepStatementDataset;
-import com.lawal.banji.springkitchen.recipe.model.Ingredient;
+import com.lawal.banji.springkitchen.food.Food;
+import com.lawal.banji.springkitchen.food.FoodService;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
 import com.lawal.banji.springkitchen.recipe.model.Step;
-import com.lawal.banji.springkitchen.recipe.service.IngredientService;
 import com.lawal.banji.springkitchen.recipe.service.RecipeService;
 import com.lawal.banji.springkitchen.recipe.service.StepService;
 import jakarta.transaction.Transactional;
@@ -21,18 +21,18 @@ public class StepSeederService {
     private static Random random = new Random();
 
     private final RecipeService recipeService;
-    private final IngredientService ingredientService;
+    private final FoodService foodService;
     private RecipeSeederService recipeSeederService;
     private IngredientSeederService ingredientSeederService;
     private StepService stepService;
 
     @Autowired
-    public StepSeederService(RecipeSeederService recipeSeederService, IngredientSeederService ingredientSeederService, StepService stepService, RecipeService recipeService, IngredientService ingredientService) {
+    public StepSeederService(RecipeSeederService recipeSeederService, IngredientSeederService ingredientSeederService, StepService stepService, RecipeService recipeService, FoodService foodService) {
         this.recipeSeederService = recipeSeederService;
         this.ingredientSeederService = ingredientSeederService;
         this.stepService = stepService;
         this.recipeService = recipeService;
-        this.ingredientService = ingredientService;
+        this.foodService = foodService;
     }
 
     @Transactional
@@ -40,18 +40,18 @@ public class StepSeederService {
         if (maxSteps < 1 && minSteps <= maxSteps)
             throw new IllegalArgumentException("maxSteps must be greater than 0 and minSteps must be less than or equal to maxSteps");
         int numberOfSteps = random.nextInt(maxSteps - minSteps + 1) + minSteps;
-        Ingredient ingredient;
+        Food food;
         String directions = "";
         Double ingredientAmount;
         for (Recipe recipe : recipeService.findAll()) {
             for (int i = 0; i < numberOfSteps; i++) {
                 directions = directions(recipe);
                 Long durationMinutes = getMinutes(timeStringExtractor(directions));
-                ingredient = ingredient(recipe);
+                food = ingredient(recipe);
                 ingredientAmount = ingredientAmount();
-                Step step = new Step(null, recipe, ingredient, ingredientAmount, directions, durationMinutes);
+                Step step = new Step(null, recipe, food, ingredientAmount, directions, durationMinutes);
                 stepService.save(step);
-                ingredientService.save(ingredient);
+                foodService.save(food);
                 recipeService.save(recipe);
             }
         }
@@ -59,10 +59,10 @@ public class StepSeederService {
 
     private Double ingredientAmount () { return random.nextDouble(11.0);}
 
-    private Ingredient ingredient (Recipe recipe) {
-        Ingredient ingredient = ingredientService.randomIngredient();
-        while (recipe.filterStepsByIngredient(ingredient) != null) ingredientService.randomIngredient();
-        return ingredient;
+    private Food ingredient (Recipe recipe) {
+        Food food = foodService.randomIngredient();
+        while (recipe.filterStepsByIngredient(food) != null) foodService.randomIngredient();
+        return food;
     }
 
     private String directions (Recipe recipe) {

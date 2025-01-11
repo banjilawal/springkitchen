@@ -1,13 +1,13 @@
 package com.lawal.banji.springkitchen;
 
 
+import com.lawal.banji.springkitchen.food.Food;
 import com.lawal.banji.springkitchen.pantry.PantryItem;
 import com.lawal.banji.springkitchen.pantry.PantryItemService;
 import com.lawal.banji.springkitchen.dataset.RecipeDescriptionDataset;
 import com.lawal.banji.springkitchen.dataset.RecipeTitleDataset;
-import com.lawal.banji.springkitchen.recipe.model.Ingredient;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
-import com.lawal.banji.springkitchen.recipe.service.IngredientService;
+import com.lawal.banji.springkitchen.food.FoodService;
 import com.lawal.banji.springkitchen.recipe.service.RecipeService;
 import com.lawal.banji.springkitchen.recipe.service.StepService;
 import jakarta.transaction.Transactional;
@@ -41,7 +41,7 @@ public class SpringkitchenApplication {
     @Transactional // Ensuring transactional context for all operations
     public CommandLineRunner seedData(
         PantryItemService pantryItemService,
-        IngredientService ingredientService,
+        FoodService foodService,
         StepService stepService,
         RecipeService recipeService
     ) {
@@ -68,35 +68,35 @@ public class SpringkitchenApplication {
 
             // 1. Seed Ingredients
             System.out.println("Seeding Ingredients...");
-            Set<Ingredient> ingredients = IngredientGenerator.ingredients(40); // Generate 40 ingredients
-            ingredients.forEach(ingredientService::save); // Save all ingredients to the database
-            System.out.println("Ingredients Seeded: " + ingredients.size());
-            System.out.println("Random ingredient:" + ingredientService.randomIngredient());
+            Set<Food> foods = IngredientGenerator.ingredients(40); // Generate 40 foods
+            foods.forEach(foodService::save); // Save all foods to the database
+            System.out.println("Ingredients Seeded: " + foods.size());
+            System.out.println("Random ingredient:" + foodService.randomIngredient());
 //
-//            // Print all saved ingredients
+//            // Print all saved foods
 //            int count = 0;
-//            for (Ingredient ingredient : ingredientService.findAll()) {
+//            for (Food ingredient : ingredientService.findAll()) {
 //                System.out.println(count + " " + ingredient.toString());
 //                count++;
 //            }
 //
-//            // Print random ingredients
+//            // Print random foods
 //            for (int i = 0; i < 5; i++) {
-//                System.out.println("Random Ingredient: " + ingredientService.randomIngredient());
+//                System.out.println("Random Food: " + ingredientService.randomIngredient());
 //            }
 //
 //            // Fetch saved Ingredients with IDs
-//            List<Ingredient> savedIngredients = ingredientService.findAll();
+//            List<Food> savedIngredients = ingredientService.findAll();
 //            if (savedIngredients.isEmpty()) {
 //                throw new IllegalStateException(
-//                        "No ingredients were saved to the database. Cannot proceed with Step generation.");
+//                        "No foods were saved to the database. Cannot proceed with Step generation.");
 //            }
 
             // 2. Seed Steps using the saved Ingredients
 //            for (Recipe recipe : recipeService.findAll()) {
 //
 //                for (int i = 0; i < new Random().nextInt(2, 12); i++) {
-//                    Ingredient ingredient = ingredientService.randomIngredient();
+//                    Food ingredient = ingredientService.randomIngredient();
 //                    while (recipe.filterByIngredients(ingredient) != null) {
 //                        ingredient = ingredientService.randomIngredient();
 //                    }
@@ -119,13 +119,13 @@ public class SpringkitchenApplication {
 //            }
 //
 //            // Validate ingredient-step relationships
-//            System.out.println("Validating Ingredient-Step Relationships...");
-//            for (Ingredient ingredient : ingredientService.findAll()) {
+//            System.out.println("Validating Food-Step Relationships...");
+//            for (Food ingredient : ingredientService.findAll()) {
 //                Set<Step> ingredientSteps = ingredient.getStepsAsSet(); // Fetch all steps for the ingredient
 //                if (ingredientSteps.isEmpty()) {
-//                    System.out.printf("Ingredient '%s' has no linked Steps.%n", ingredient.getName());
+//                    System.out.printf("Food '%s' has no linked Steps.%n", ingredient.getName());
 //                } else {
-//                    System.out.printf("Ingredient '%s' is linked to Steps:%n", ingredient.getName());
+//                    System.out.printf("Food '%s' is linked to Steps:%n", ingredient.getName());
 //                    for (Step step : ingredientSteps) {
 //                        System.out.printf("\t- Step '%s' with directions: '%s'%n",
 //                                step.getId(), step.getDirections());
@@ -178,14 +178,14 @@ public class SpringkitchenApplication {
 //                    Step step = new Step();
 //                    step.setDirections(StepStatementDataset.statements());
 //                    step.setDurationMinutes((long) (new Random().nextInt(60) + 1)); // Random duration between 1-60 minutes
-//                    Ingredient ingredient = ingredientService.randomIngredient();
+//                    Food ingredient = ingredientService.randomIngredient();
 //                    if (ingredient == null) {
 //                        throw new IllegalStateException("Random ingredient was null. Please ensure ingredients are correctly seeded.");
 //                    }
 //                    step.setIngredient(ingredient);
 //                    step.setIngredientAmount(new Random().nextDouble(1, 5)); // Random amount between 1 and 5 units
 //                    System.out.println("Step: " + step.toString());
-//                    System.out.println("Ingredient: " + ingredient.toString());
+//                    System.out.println("Food: " + ingredient.toString());
 //                    stepService.save(step);
 //                    ingredientService.save(ingredient);
 //                }

@@ -1,5 +1,6 @@
 package com.lawal.banji.springkitchen.recipe.model;
 
+import com.lawal.banji.springkitchen.food.Food;
 import com.lawal.banji.springkitchen.meal.Meal;
 import jakarta.persistence.*;
 
@@ -229,12 +230,12 @@ public class Recipe {
         return matches;
     }
 
-    public Set<Step> filterStepsByIngredient(Ingredient ingredient) {
+    public Set<Step> filterStepsByIngredient(Food food) {
         Set<Step> matches = new HashSet<>();
         if (steps == null) steps = new HashSet<>();
-        if (ingredient != null) {
+        if (food != null) {
             for (Step step : new HashSet<>(steps)) {
-                if (step.getIngredient().equals(ingredient)) matches.add(step);
+                if (step.getIngredient().equals(food)) matches.add(step);
             }
         }
         return matches;
@@ -263,13 +264,13 @@ public class Recipe {
     }
 
     // Get recipe's ingredients
-    public Set<Ingredient> getIngredients() {
-        Set<Ingredient> ingredients = new HashSet<>();
+    public Set<Food> getIngredients() {
+        Set<Food> foods = new HashSet<>();
         if (steps == null) steps = new HashSet<>();
         for (Step step : steps) {
-            ingredients.add(step.getIngredient());
+            foods.add(step.getIngredient());
         }
-        return ingredients;
+        return foods;
     }
 
     /* Update methods */

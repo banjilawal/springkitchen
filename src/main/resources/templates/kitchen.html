@@ -154,7 +154,7 @@
                     th:onclick="|location.href='@{/kitchen/recipe/{recipeId}/step/{stepId}(recipeId=${recipe.id}, stepId=${step.id})}'|">
                     <td th:text="${iterStat.index + 1}"></td>
                     <td th:text="${step.durationMinutes}"></td>
-                    <td th:text="${step.ingredient.name}"></td>
+                    <td th:text="${step.food.name}"></td>
                     <td th:text="${step.ingredientAmount}"></td>
                     <td th:text="${step.directions}"></td>
                 </tr>
@@ -197,7 +197,7 @@
                                 <input type="text" th:field="*{steps[__${iterStat.index}__].durationMinutes}" min="0" placeholder="Duration (min)"/>
                             </td>
                             <td>
-                                <input type="text" th:field="*{steps[__${iterStat.index}__].ingredient.name}" placeholder="Ingredient" required/>
+                                <input type="text" th:field="*{steps[__${iterStat.index}__].food.name}" placeholder="Ingredient" required/>
                             </td>
                             <td>
                                 <input type="text" th:field="*{steps[__${iterStat.index}__].ingredientAmount}" min="0" placeholder="ingredientAmount"/>
@@ -228,7 +228,7 @@
                 newRow.innerHTML = `
                     <td>${stepIndex + 1}</td>
                     <td><input type="number" name="steps[${stepIndex}].durationMinutes" value="0" placeholder="Minutes" /></td>
-                    <td><input type="text" name="steps[${stepIndex}].ingredient.name" value="Default Ingredient" required /></td>
+                    <td><input type="text" name="steps[${stepIndex}].food.name" value="Default Ingredient" required /></td>
                     <td><input type="number" name="steps[${stepIndex}].ingredientAmount" value="1" placeholder="Amount" /></td>
                     <td><input type="text" name="steps[${stepIndex}].directions" value="Default direction" required /></td>
                     <td><button type="button" onclick="removeStep(this)">Remove</button></td>
@@ -245,7 +245,7 @@
                 for (let i = 0; i < rows.length; i++) {
                     // Adjust the names for each remaining field
                     rows[i].querySelector('input[name$=".durationMinutes"]').name = `steps[${i}].durationMinutes`;
-                    rows[i].querySelector('input[name$=".ingredient.name"]').name = `steps[${i}].ingredient.name`;
+                    rows[i].querySelector('input[name$=".food.name"]').name = `steps[${i}].food.name`;
                     rows[i].querySelector('input[name$=".ingredientAmount"]').name = `steps[${i}].ingredientAmount`;
                     rows[i].querySelector('input[name$=".directions"]').name = `steps[${i}].directions`;
                 }
@@ -287,8 +287,8 @@
             <tr>
                 <td th:text="${step.id}"></td>
                 <td th:text="${step.durationMinutes}"></td>
-                <td th:text="${step.ingredient.name}"></td>
-                <td th:text="${step.ingredient.amount}"></td>
+                <td th:text="${step.food.name}"></td>
+                <td th:text="${step.food.amount}"></td>
                 <td th:text="${step.directions}"></td>
             </tr>
             </tbody>

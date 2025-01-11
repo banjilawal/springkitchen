@@ -1,5 +1,6 @@
 package com.lawal.banji.springkitchen.recipe.model;
 
+import com.lawal.banji.springkitchen.food.Food;
 import jakarta.persistence.*;
 
 import jakarta.validation.constraints.NotBlank;
@@ -15,7 +16,7 @@ public class Step {
     /* String constants */
     public static final String STEP_UPDATE_SOURCE_CANNOT_BE_NULL = "Update source is null. Update failed";
     public static final String INVALID_UPDATE_SOURCE_ID = "Update source id is invalid. Update failed";
-    public static final String STEP_INGREDIENT_AMOUNT_CANNOT_BE_NEGATIVE = "Ingredient cannot be null or blank";
+    public static final String STEP_INGREDIENT_AMOUNT_CANNOT_BE_NEGATIVE = "Food cannot be null or blank";
     public static final String STEP_DIRECTIONS_CANNOT_BE_NULL_OR_BLANK = "Directions cannot be null or blank";
     public static final String STEP_DURATION_CANNOT_BE_NEGATIVE = "Duration minutes cannot be negative";
 
@@ -44,7 +45,7 @@ public class Step {
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "ingredient_id")
-    private Ingredient ingredient;
+    private Food ingredient;
 
     /* Constructors */
     public Step() {}
@@ -52,7 +53,7 @@ public class Step {
     public Step(
         Long id,
         Recipe recipe,
-        Ingredient ingredient,
+        Food ingredient,
         Double ingredientAmount,
         String directions,
         Long durationMinutes
@@ -72,7 +73,7 @@ public class Step {
     public static class Builder {
         private Long id;
         private Recipe recipe;
-        private Ingredient ingredient;
+        private Food ingredient;
         private Double ingredientAmount;
         private String directions;
         private Long durationMinutes;
@@ -87,8 +88,8 @@ public class Step {
             return this;
         }
 
-        public Builder setIngredient(Ingredient ingredient) {
-            this.ingredient = ingredient;
+        public Builder setIngredient(Food food) {
+            this.ingredient = food;
             return this;
         }
 
@@ -119,7 +120,7 @@ public class Step {
 
     public Recipe getRecipe() { return recipe; }
 
-    public Ingredient getIngredient() { return ingredient; }
+    public Food getIngredient() { return ingredient; }
 
     public Double getIngredientAmount() { return ingredientAmount; }
 
@@ -141,11 +142,11 @@ public class Step {
         this.recipe = recipe;
     }
 
-    public void setIngredient(Ingredient ingredient) {
-        if (ingredient == this.ingredient) return;
-        if (ingredient != null) ingredient.addStep(this);
+    public void setIngredient(Food food) {
+        if (food == this.ingredient) return;
+        if (food != null) food.addStep(this);
         if (this.ingredient != null) this.ingredient.removeStep(this);
-        this.ingredient = ingredient;
+        this.ingredient = food;
     }
 
     public void setIngredientAmount(Double ingredientAmount) {
@@ -212,7 +213,7 @@ public class Step {
         return getClass().getSimpleName() + "[id:" + id + " " + directionStringHandler() + durationString + "]";
     }
 
-    /* Nicely combines the ingredient, it's amount and the expected duration into a single string  */
+    /* Nicely combines the food, it's amount and the expected duration into a single string  */
     public String directionStringHandler () {
         String ingredientString = ingredient == null ? "" : ingredient.getName();
         String ingredientAmountString = ingredientAmount == null ? "" : "amount:" + ingredientAmount;
