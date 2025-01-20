@@ -37,6 +37,11 @@ public class RecipeApplicationRunner implements CommandLineRunner {
 
         // Test FoodRestController
         testRecipeRESTController();
+        for (Step step : recipeMealOrchestratorService.findAllSteps()) {
+            if (step.getRecipe() == null) {
+                recipeMealOrchestratorService.deleteStep(step.getId());
+            }
+        }
         System.out.println("Finished RecipeApplicationRunner...");
 
     }
