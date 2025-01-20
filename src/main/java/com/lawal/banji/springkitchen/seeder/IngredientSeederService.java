@@ -1,8 +1,8 @@
 package com.lawal.banji.springkitchen.seeder;
 
 import com.lawal.banji.springkitchen.dataset.FoodNameDataset;
-import com.lawal.banji.springkitchen.food.Food;
-import com.lawal.banji.springkitchen.food.FoodService;
+import com.lawal.banji.springkitchen.food.model.Food;
+import com.lawal.banji.springkitchen.food.service.FoodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

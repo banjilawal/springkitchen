@@ -1,8 +1,13 @@
 package com.lawal.banji.springkitchen.orchestrator;
 
-import com.lawal.banji.springkitchen.food.Food;
+import com.lawal.banji.springkitchen.food.model.Food;
+import com.lawal.banji.springkitchen.food.service.FoodServiceLoggingMessage;
+import com.lawal.banji.springkitchen.food.service.FoodServiceValidator;
+import com.lawal.banji.springkitchen.global.AppLogger;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
-import com.lawal.banji.springkitchen.recipe.model.Step;
+import com.lawal.banji.springkitchen.recipe.service.RecipeServiceValidator;
+import com.lawal.banji.springkitchen.step.model.Step;
+import com.lawal.banji.springkitchen.step.service.StepServiceValidator;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +30,9 @@ public class RecipeMealRelationshipManager {
 
     @Transactional
     public Recipe savingRecipeHandler (Recipe recipe) {
-        if (!recipeMealServiceHelper.isValidRecipe(recipe)) {
-            throw new IllegalArgumentException("Recipe failed validation in RecipeService.save()");
-        }
-        if (recipe.getSteps() == null) { recipe.setSteps(new HashSet<>()); }
+        RecipeServiceValidator.validateSaveRecipeParameter(recipe);
         for (Step step : recipe.getSteps()) {
-            associateStepWithIngredient(step, step.getIngredient());
+            associateStepWithFood(step, step.getIngredient());
             associateStepWithRecipe(step, recipe);
         }
         return recipeMealServiceHelper.saveRecipe(recipe);
@@ -38,53 +40,39 @@ public class RecipeMealRelationshipManager {
 
     @Transactional
     public Recipe updatingRecipeHandler (Long targetId, Recipe source) {
-        if (!recipeMealServiceHelper.isValidRecipeUpdate(targetId, source)) {
-            logger.error("Invalid recipe passed to RecipeMealRelationshipManager: {}", source);
-            throw new IllegalArgumentException("Recipe failed validation in RecipeMealRelationshipManager.");
-        }
+        RecipeServiceValidator.validateUpdateRecipeParameters(targetId, source);
         return savingRecipeHandler(recipeMealServiceHelper.updateRecipe(targetId, source));
     }
 
     @Transactional
-    public Food savingIngredientHandler(Food food) {
-        if (recipeMealServiceHelper.isValidIngredient(food)) {
-            logger.error("Invalid food passed to FoodService.save(): {}", food);
-            throw new IllegalArgumentException("Food failed validation in FoodService.save()");
-        }
+    public Food savingFoodHandler(Food food) {
+        AppLogger.debug(RecipeMealRelationshipManager.class, FoodServiceLoggingMessage.SAVING_FOOD_MESSAGE);
+        FoodServiceValidator.validateSaveFoodParameter(food);
         if (food.getSteps() == null) { food.setSteps(new HashSet<>()); }
         for (Step step : food.getSteps()) {
             associateStepWithRecipe(step, step.getRecipe());
-            associateStepWithIngredient(step, food);
+            associateStepWithFood(step, food);
         }
-        return recipeMealServiceHelper.saveIngredient(food);
+        return recipeMealServiceHelper.saveFood(food);
     }
 
     @Transactional
-    public Food updatingIngredientHandler(Long targetId, Food source) {
-        if (!recipeMealServiceHelper.isValidIngredientUpdate(targetId, source)) {
-            logger.error("Invalid ingredient passed to FoodService.update(): {}", source);
-            throw new IllegalArgumentException("Food failed validation in FoodService.update()");
-        }
-        return savingIngredientHandler(recipeMealServiceHelper.updateIngredient(targetId, source));
+    public Food updateFoodHandler(Long targetId, Food source) {
+        FoodServiceValidator.validateUpdateFoodParameters(targetId, source);
+        return savingFoodHandler(recipeMealServiceHelper.updateFood(targetId, source));
     }
 
     @Transactional
     public Step savingStepHandler(Step step) {
-        if (!recipeMealServiceHelper.isValidStep(step)  ) {
-            logger.error("Invalid step passed to StepService.save(): {}", step);
-            throw new IllegalArgumentException("Step failed validation in StepService.save()");
-        }
+        StepServiceValidator.validateSaveStepParameter(step);
         associateStepWithRecipe(step, step.getRecipe());
-        associateStepWithIngredient(step, step.getIngredient());
+        associateStepWithFood(step, step.getIngredient());
         return recipeMealServiceHelper.saveStep(step);
     }
 
     @Transactional
     public Step updatingStepHandler(Long targetId, Step source) {
-        if (!recipeMealServiceHelper.isValidStepUpdate(targetId, source)) {
-            logger.error("Invalid step passed to StepService.update(): {}", source);
-            throw new IllegalArgumentException("Step failed validation in StepService.update()");
-        }
+        StepServiceValidator.validateUpdateStepParameters(targetId, source);
         return savingStepHandler(recipeMealServiceHelper.updateStep(targetId, source));
     }
 
@@ -100,23 +88,23 @@ public class RecipeMealRelationshipManager {
                     else { deletingStepHandler(step.getId()); }
                 }
             }
-            recipeMealServiceHelper.deleteRecipe(recipeId);
+            recipeMealServiceHelper.deleteRecipeById(recipeId);
         }
     }
 
     @Transactional
-    public void deletingIngredientHandler(Long ingredientId) {
-        Food food = recipeMealServiceHelper.findIngredientById(ingredientId);
+    public void deletingFoodHandler(Long foodId) {
+        Food food = recipeMealServiceHelper.findFoodById(foodId);
         if (food == null) { return; }
         else {
             if (food.getSteps() != null) {
                 for (Step step : food.getSteps()) {
-                    disassociateStepFromIngredient(step, food);
+                    disassociateStepFromFood(step, food);
                     if (step.getRecipe() != null) { recipeMealServiceHelper.saveStep(step); }
                     else { deletingStepHandler(step.getId()); }
                 }
             }
-            recipeMealServiceHelper.deleteIngredient(ingredientId);
+            recipeMealServiceHelper.deleteFoodById(foodId);
         }
     }
 
@@ -125,8 +113,9 @@ public class RecipeMealRelationshipManager {
         Step step = recipeMealServiceHelper.findStepById(stepId);
         if (step == null) { return; }
         else {
-            if ((step.getIngredient() != null && step.getRecipe() != null)) return;
-            recipeMealServiceHelper.deleteStep(stepId);
+            disassociateStepFromRecipe(step, step.getRecipe());
+            disassociateStepFromFood(step, step.getIngredient());
+            recipeMealServiceHelper.deleteStepById(stepId);
         }
     }
 
@@ -151,23 +140,23 @@ public class RecipeMealRelationshipManager {
         }
     }
 
-    private void associateStepWithIngredient(Step step, Food food) {
+    private void associateStepWithFood(Step step, Food food) {
         if (food != null && step != null) {
             if (food.getSteps() == null) food.setSteps(new HashSet<>());
             food.addStep(step);
             step.setIngredient(food);
-            recipeMealServiceHelper.saveIngredient(food);
+            recipeMealServiceHelper.saveFood(food);
             recipeMealServiceHelper.saveStep(step);
             logger.info("Associated step '{}' with food '{}'", step.getId(), food.getId());
             return;
         } if (food == null && step != null) {
             step.setIngredient(null);
             recipeMealServiceHelper.saveStep(step);
-            logger.warn("Food is null in associateStepWithIngredient() nothing to associate");
+            logger.warn("Food is null in associateStepWithFood() nothing to associate");
             return;
         } else {
             logger.error("Both food and step are null in associateStepWithRecipe()");
-            throw new IllegalArgumentException("Food and step cannot both be null in associateStepWithIngredient()");
+            throw new IllegalArgumentException("Food and step cannot both be null in associateStepWithFood()");
         }
     }
 
@@ -191,22 +180,22 @@ public class RecipeMealRelationshipManager {
         }
     }
 
-    private void disassociateStepFromIngredient(Step step, Food food) {
+    private void disassociateStepFromFood(Step step, Food food) {
         if (food != null && step != null) {
             if (food.getSteps() == null) food.setSteps(new HashSet<>());
             food.removeStep(step);
             step.setIngredient(null);
-            recipeMealServiceHelper.saveIngredient(food);
+            recipeMealServiceHelper.saveFood(food);
             recipeMealServiceHelper.saveStep(step);
             logger.info("Disassociated step '{}' from food '{}'", step.getId(), food.getId());
             return;
         } if (food == null && step != null) {
             step.setRecipe(null);
             recipeMealServiceHelper.saveStep(step);
-            logger.warn("Food is null in disassociateStepFromIngredient() nothing to disassociate");
+            logger.warn("Food is null in disassociateStepFromFood() nothing to disassociate");
         } else {
-            logger.error("Both food and step are null in disassociateStepFromIngredient()");
-            throw new IllegalArgumentException("Food and step cannot both be null in disassociateStepFromIngredient()");
+            logger.error("Both food and step are null in disassociateStepFromFood()");
+            throw new IllegalArgumentException("Food and step cannot both be null in disassociateStepFromFood()");
         }
     }
 }

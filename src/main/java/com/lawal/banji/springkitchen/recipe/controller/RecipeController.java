@@ -2,7 +2,7 @@ package com.lawal.banji.springkitchen.recipe.controller;
 
 import com.lawal.banji.springkitchen.orchestrator.RecipeMealOrchestratorService;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
-import com.lawal.banji.springkitchen.recipe.model.Step;
+import com.lawal.banji.springkitchen.step.model.Step;
 import com.lawal.banji.springkitchen.recipe.service.RecipeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/kitchen/recipe")
 public class RecipeController {
 
-    public static final Logger logger = LoggerFactory.getLogger(RecipeController.class);
+    public static final Logger logger = LoggerFactory.getLogger(RecipeRestController.class);
 
     public static final String REDIRECT = "redirect:/kitchen/recipe";
     public static final String REDIRECT_RECIPE_LIST = "redirect:/recipes";
@@ -59,7 +59,7 @@ public class RecipeController {
 
     @GetMapping({"/search"})
     public String searchRecipes(Model model, @RequestParam(value = "string", required = false) String string) {
-        model.addAttribute("recipes", recipeMealOrchestratorService.search(string));
+        model.addAttribute("recipes", recipeMealOrchestratorService.searchRecipes(string));
         model.addAttribute("view", RECIPE_LIST_VIEW);
         model.addAttribute("pageHeading", SEARCH_PAGE_HEADING);
         return KITCHEN_VIEW;
@@ -101,8 +101,6 @@ public class RecipeController {
     ) {
         String view = "";
         String pageHeading = "";
-        if (!recipeMealOrchestratorService.isValidRecipe(recipe))
-            throw new IllegalArgumentException("Recipe is not valid.");
         if (formHasValidationErrors(recipe, bindingResult, model) || bindingResult.hasErrors()) {
             logger.warn("Validation failed during form submission.");
             model.addAttribute("recipe", recipe);

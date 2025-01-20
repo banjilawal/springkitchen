@@ -1,10 +1,14 @@
 package com.lawal.banji.springkitchen.recipe.service;
 
-import com.lawal.banji.springkitchen.recipe.repo.RecipeRepo;
+import com.lawal.banji.springkitchen.global.AppLogger;
+
+import com.lawal.banji.springkitchen.recipe.RecipeRepo;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
+import com.lawal.banji.springkitchen.recipe.service.exception.RecipeServiceDeleteOperationFailed;
+import com.lawal.banji.springkitchen.recipe.service.exception.RecipeServiceSaveOperationFailed;
+import com.lawal.banji.springkitchen.recipe.service.exception.RecipeServiceUpdateExceptionTargetNotFound;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,23 +17,11 @@ import java.util.*;
 @Service
 public class RecipeService {
 
-    public static final String RECIPE_REPO_IS_EMPTY = "RecipeRepo is empty";
-
     public static final String RECIPE_NOT_FOUND_BY_ID = "PantryIngredientSearchService did not find item with ID %d";
-    public static final String RECIPE_NOT_FOUND_BY_TITLE = "PantryIngredientSearchService did not find item with TITLE %s";
-    public static final String RECIPE_NOT_FOUND_BY_DESCRIPTION = "PantryIngredientSearchService did not find item with DESCRIPTION %s";
 
     public static final String RECIPE_ID_CANNOT_BE_NULL = "PantryIngredientSearchService method does not accept null recipeID";
-    public static final String RECIPE_FAILED_VALIDATION = "The recipe did not pass PantryIngredientSearchService validation checks";
-    public static final String METHOD_DOES_NOT_ALLOW_NULL_RECIPE_AS_PARAMETER = "Null recipe cannot be passed to PantryIngredientSearchService method";
-
-    public static final String RECIPE_UPDATE_SOURCE_FAILED_VALIDATION = "Recipe update source validation failed";
-    public static final String SERVICE_DOES_NOT_AUTHORIZE_ITEM_UPDATE = "One or more validation checks failed. PantryIngredientSearchService.update() failed";
-
-    public static final String RECIPE_SEARCH_QUERY_CANNOT_BE_EMPTY = "Search query cannot be null or empty";
 
     private static final Random random = new Random();
-    private static final Logger logger = LoggerFactory.getLogger(RecipeService.class);
 
     private final RecipeRepo recipeRepo;
 
@@ -38,75 +30,107 @@ public class RecipeService {
         this.recipeRepo = recipeRepo;
     }
 
+
     /* Create methods */
     @Transactional
     public Recipe save (Recipe recipe) {
-        if (!isValidRecipe(recipe)) loggingExceptionHandler(RECIPE_FAILED_VALIDATION);
-        return recipeRepo.save(recipe);
+        RecipeServiceValidator.validateSaveRecipeParameter(recipe);
+        AppLogger.debug(RecipeService.class, RecipeServiceLoggingMessage.SAVING_RECIPE_MESSAGE);
+        try {
+            Recipe savedRecipe = recipeRepo.save(recipe);
+            AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.SUCCESSFULLY_SAVE_RECIPE + savedRecipe.toString());
+            return savedRecipe;
+        } catch (DataAccessException e) {
+            AppLogger.error(RecipeService.class, String.format(RecipeServiceLoggingMessage.SAVING_RECIPE_FAILED + e.getMessage()), e);
+            throw e;
+        }
     }
 
     /* Read methods */
     @Transactional(readOnly = true)
-    public Long count() { return recipeRepo.count();}
+    public Long count() {
+        Long totalRecipes = recipeRepo.count();
+        AppLogger.debug(RecipeService.class, totalRecipes + RecipeServiceLoggingMessage.NUMBER_OF_RECIPES_MESSAGE);
+        return totalRecipes;
+    }
 
     @Transactional(readOnly = true)
     public Recipe findById(Long id) {
-        if (id == null) loggingExceptionHandler(RECIPE_ID_CANNOT_BE_NULL);
-        else {
-            Recipe recipe = recipeRepo.findById(id).orElse(null);
-            if (recipe == null) return nullRecipeLogHandler(String.format(RECIPE_NOT_FOUND_BY_ID, id));
-            return recipeRepo.save(recipe);
+        RecipeServiceValidator.validateRecipeServiceMethodLongParameter(id);
+        AppLogger.debug(RecipeService.class, RecipeServiceLoggingMessage.FINDING_RECIPE_BY_ID_MESSAGE + id);
+        Recipe recipe = recipeRepo.findById(id).orElse(null);
+        if (recipe == null) {
+            AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.RECIPE_NOT_FOUND_BY_ID_MESSAGE + id);
+        } else {
+            AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.FOUND_RECIPE_BY_ID_MESSAGE + recipe.toString());
         }
-        return null;
+        return recipe;
     }
 
     @Transactional(readOnly = true)
     public Recipe findByTitle(String title) {
-        if (title == null || title.trim().isBlank()) loggingExceptionHandler(Recipe.RECIPE_TITLE_CANNOT_BE_NULL);
+        RecipeServiceValidator.validateRecipeServiceMethodStringParameter(title);
+        AppLogger.debug(RecipeService.class, RecipeServiceLoggingMessage.FINDING_RECIPE_BY_TITLE_MESSAGE + title);
 
         Recipe recipe = recipeRepo.findByTitleIgnoreCase(title);
-        if (recipe == null) { return nullRecipeLogHandler(String.format(RECIPE_NOT_FOUND_BY_TITLE, title)); }
-        else {
-            if (recipe.getSteps() == null) recipe.setSteps(new HashSet<>());
-            if (recipe.getMeals() == null) recipe.setMeals(new HashSet<>());
-            return recipeRepo.save(recipe);
+        if (recipe == null) {
+            AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.RECIPE_NOT_FOUND_BY_TITLE_MESSAGE + title);
+        } else {
+            AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.FOUND_RECIPE_BY_TITLE_MESSAGE + recipe.toString());
         }
+        return recipe;
     }
 
     @Transactional(readOnly = true)
     public Recipe findByDescription(String description) {
-        if (description == null || description.trim().isBlank()) loggingExceptionHandler(Recipe.RECIPE_DESCRIPTION_CANNOT_BE_NULL);
+        RecipeServiceValidator.validateRecipeServiceMethodStringParameter(description);
+        AppLogger.debug(RecipeService.class, RecipeServiceLoggingMessage.FINDING_RECIPE_BY_DESCRIPTION_MESSAGE + description);
 
         Recipe recipe = recipeRepo.findByDescriptionIgnoreCase(description);
-        if (recipe == null) { return nullRecipeLogHandler(String.format(RECIPE_NOT_FOUND_BY_TITLE, description)); }
-        else {
-            if (recipe.getSteps() == null) recipe.setSteps(new HashSet<>());
-            if (recipe.getMeals() == null) recipe.setMeals(new HashSet<>());
-            return recipeRepo.save(recipe);
+        if (recipe == null) {
+            AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.RECIPE_NOT_FOUND_BY_DESCRIPTION_MESSAGE + description);
+        } else {
+            AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.FOUND_RECIPE_BY_DESCRIPTION_MESSAGE + recipe.toString());
         }
+        return recipe;
     }
 
     @Transactional(readOnly = true)
     public List<Recipe> findAll() {
-        return recipeRepo.findAll();
+        AppLogger.debug(RecipeService.class, RecipeServiceLoggingMessage.FETCHING_ALL_RECIPES_MESSAGE);
+        List<Recipe> recipes = recipeRepo.findAll();
+        AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.FOUND_ALL_RECIPES_MESSAGE + recipes.size());
+        return List.copyOf(recipes);
     }
 
     @Transactional(readOnly = true)
     public Set<Recipe> search(String string) {
-        if (string == null || string.trim().isBlank()) {
-            return Collections.emptySet();
+        Set<Recipe> matches = new HashSet<>();
+        AppLogger.debug(RecipeService.class, RecipeServiceLoggingMessage.SEARCHING_FOR_MATCHES_BY_STRING_MESSAGE + string);
+        if (string != null && !string.isBlank()) {
+            string = string.toLowerCase();
+            for (Recipe recipe : recipeRepo.findAll()) {
+                if (recipe.getTitle().toLowerCase().contains(string) ||
+                    recipe.getDescription().toLowerCase().contains(string)
+                ) matches.add(recipe);
+            }
         }
-        return new HashSet<>(recipeRepo.search(string));
+        AppLogger.info(RecipeService.class, matches.size() + RecipeServiceLoggingMessage.TOTAL_MATCHES_TO_STRING_FOUND_MESSAGE + string);
+        return matches;
     }
 
     @Transactional(readOnly = true)
     public Recipe randomRecipe() {
         long count = count();
+        Recipe recipe = recipeRepo.findAll().get(random.nextInt((int) count));
         if (count == 0) {
-            logger.info(RECIPE_REPO_IS_EMPTY + " PantryIngredientSearchService.randomRecipe() cannot return random recipe");
-            return null;
+            AppLogger.debug(RecipeService.class, RecipeServiceLoggingMessage.NO_RANDOM_RECIPE_AVAILABLE_MESSAGE);
+        } else if (recipe == null) {
+            AppLogger.debug(RecipeService.class, RecipeServiceLoggingMessage.FAILED_TO_GET_RANDOM_RECIPE_FROM_NONEMPTY_REPO_MESSAGE);
+        } else {
+            AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.RANDOMLY_SELECTING_RECIPE_MESSAGE + recipe.toString());
         }
-        return recipeRepo.findAll().get(random.nextInt((int) count));
+        return recipe;
     }
 
     @Transactional(readOnly = true)
@@ -121,77 +145,34 @@ public class RecipeService {
     /* Update methods */
     @Transactional
     public Recipe update (Long targetId, Recipe source) {
-        if (!areValidUpdateParameters(targetId, source)) loggingExceptionHandler(SERVICE_DOES_NOT_AUTHORIZE_ITEM_UPDATE);
-
-        Recipe target = findById(targetId);
-        if (target == null) return nullRecipeLogHandler(String.format(RECIPE_NOT_FOUND_BY_ID, targetId));
-
-        target.getUpdate(source);
-        return recipeRepo.save(target);
+        RecipeServiceValidator.validateUpdateRecipeParameters(targetId, source);
+        try {
+            Recipe target = findById(targetId);
+            if (target == null) {
+                AppLogger.error(RecipeService.class, RecipeServiceLoggingMessage.RECIPE_NOT_FOUND_BY_ID_MESSAGE + targetId, new RecipeServiceUpdateExceptionTargetNotFound());
+                throw new RecipeServiceUpdateExceptionTargetNotFound();
+            }
+            target.getUpdate(source);
+            Recipe savedRecipe = recipeRepo.save(target);
+            AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.SUCCESSFULLY_UPDATED_RECIPE_MESSAGE + savedRecipe.toString());
+            return savedRecipe;
+        } catch (DataAccessException e) {
+            AppLogger.error(RecipeService.class, RecipeServiceSaveOperationFailed.MESSAGE + e.getMessage(), e);
+            throw e;
+        }
     }
 
     /* Delete methods */
     @Transactional
     public void deleteById(Long id) {
-        if (id == null) { loggingExceptionHandler(RECIPE_ID_CANNOT_BE_NULL); }
-        else recipeRepo.deleteById(id);
-    }
-
-    /* Validation methods */
-    @Transactional
-    public boolean isValidRecipe(Recipe recipe) {
-        if (recipe == null) {
-            loggingExceptionHandler(METHOD_DOES_NOT_ALLOW_NULL_RECIPE_AS_PARAMETER);
-            return false;
+        RecipeServiceValidator.validateRecipeServiceMethodLongParameter(id);
+        AppLogger.debug(RecipeService.class, RecipeServiceLoggingMessage.DELETING_RECIPE_MESSAGE);
+        try {
+            recipeRepo.deleteById(id);
+            AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.SUCCESSFULLY_DELETE_RECIPE);
+        } catch (DataAccessException e) {
+            AppLogger.error(RecipeService.class, RecipeServiceDeleteOperationFailed.MESSAGE + e.getMessage(), e);
+            throw e;
         }
-        if (recipe.getTitle() == null || recipe.getTitle().isBlank()) {
-            loggingExceptionHandler(Recipe.RECIPE_TITLE_CANNOT_BE_NULL);
-            return false;
-        }
-        if (recipe.getDescription() == null || recipe.getDescription().isBlank()) {
-            loggingExceptionHandler(Recipe.RECIPE_DESCRIPTION_CANNOT_BE_NULL);
-            return false;
-        }
-        if (recipe.getSteps() == null) recipe.setSteps(new HashSet<>());
-        if (recipe.getMeals() == null) recipe.setMeals(new HashSet<>());
-        return true;
-    }
-
-    @Transactional
-    public boolean areValidUpdateParameters(Long targetId, Recipe source) {
-        if (targetId == null || source.getId() == null) {
-            loggingExceptionHandler(RECIPE_ID_CANNOT_BE_NULL);
-            return false;
-        }
-        if (source.getId() != null && !targetId.equals(source.getId())) {
-            loggingExceptionHandler(Recipe.INVALID_UPDATE_SOURCE_ID);
-            return false;
-        }
-        if (!isValidRecipe(source)) {
-            loggingExceptionHandler(RECIPE_UPDATE_SOURCE_FAILED_VALIDATION);
-            return false;
-        }
-        if (source.getSteps() == null) {
-            loggingExceptionHandler(Recipe.NULL_STEPS_COLLECTION_NOT_ALLOWED);
-            return false;
-        }
-        if (source.getMeals() == null) {
-            loggingExceptionHandler(Recipe.NULL_MEALS_COLLECTION_NOT_ALLOWED);
-            return false;
-        }
-        return true;
-    }
-
-    /* Logging methods */
-    @Transactional
-    public Recipe nullRecipeLogHandler (String logMessage) {
-        logger.info(logMessage);
-        return null;
-    }
-
-    @Transactional
-    public void loggingExceptionHandler (String errorMessage) {
-        logger.error(errorMessage);
-        throw new IllegalArgumentException(errorMessage);
     }
 }

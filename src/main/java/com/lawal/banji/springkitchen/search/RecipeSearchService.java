@@ -1,11 +1,10 @@
 package com.lawal.banji.springkitchen.search;
 
-import com.lawal.banji.springkitchen.food.Food;
+import com.lawal.banji.springkitchen.food.model.Food;
 import com.lawal.banji.springkitchen.meal.Meal;
 import com.lawal.banji.springkitchen.orchestrator.RecipeMealServiceHelper;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
-import com.lawal.banji.springkitchen.recipe.model.Step;
-import com.lawal.banji.springkitchen.food.FoodValidator;
+import com.lawal.banji.springkitchen.step.model.Step;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +19,7 @@ public class RecipeSearchService {
     private final RecipeMealServiceHelper recipeMealServiceHelper;
 
     @Autowired
-    public RecipeSearchService(RecipeMealServiceHelper recipeMealServiceHelper, FoodValidator foodValidator) {
+    public RecipeSearchService(RecipeMealServiceHelper recipeMealServiceHelper) {
         this.recipeMealServiceHelper = recipeMealServiceHelper;
     }
 
@@ -28,7 +27,7 @@ public class RecipeSearchService {
     @Transactional(readOnly = true)
     public Set<Recipe> search(String string) {
         Set<Recipe> matches = searchRecipes(string);
-        for (Food food : searchIngredients(string)) {
+        for (Food food : searchFoods(string)) {
             matches.addAll(food.getRecipes());
         }
         for(Step step : searchSteps(string)) {
@@ -55,16 +54,16 @@ public class RecipeSearchService {
 
     /* Food Search Methods */
     @Transactional(readOnly = true)
-    public Food findIngredientById(Long id) { return recipeMealServiceHelper.findIngredientById(id); }
+    public Food findFoodById(Long id) { return recipeMealServiceHelper.findFoodById(id); }
 
     @Transactional(readOnly = true)
-    public Food findIngredientByName(String name) { return recipeMealServiceHelper.findIngredientByName(name); }
+    public Food findFoodByName(String name) { return recipeMealServiceHelper.findFoodByName(name); }
 
     @Transactional(readOnly = true)
-    public List<Food> findAllIngredients() { return recipeMealServiceHelper.findAllIngredients(); }
+    public List<Food> findAllFoods() { return recipeMealServiceHelper.findAllFoods(); }
 
     @Transactional(readOnly = true)
-    public Set<Food> searchIngredients(String string) { return recipeMealServiceHelper.searchIngredients(string); }
+    public Set<Food> searchFoods(String string) { return recipeMealServiceHelper.searchFoods(string); }
 
     /* Step Search Methods */
     @Transactional(readOnly = true)
@@ -107,20 +106,20 @@ public class RecipeSearchService {
     @Transactional(readOnly = true)
     public Set<Food> selectIngredientByRecipe(Recipe recipe) {
         Set<Food> matches = new HashSet<>();
-        for (Food food : recipeMealServiceHelper.findAllIngredients()) {
+        for (Food food : recipeMealServiceHelper.findAllFoods()) {
             if (food.getRecipes().contains(recipe)) matches.add(food);
         }
         return matches;
     }
-
-    @Transactional(readOnly = true)
-    public Set<Food> selectIngredientByMeal(Meal meal) {
-        Set<Food> matches = new HashSet<>();
-        for (Food food : recipeMealServiceHelper.findAllIngredients()) {
-            if (food.getMeals().contains(meal)) matches.add(food);
-        }
-        return matches;
-    }
+//
+//    @Transactional(readOnly = true)
+//    public Set<Food> selectFoodByMeal(Meal meal) {
+//        Set<Food> matches = new HashSet<>();
+//        for (Food food : recipeMealServiceHelper.findAllRecipes()) {
+//            if (food.getMeals().contains(meal)) matches.add(food);
+//        }
+//        return matches;
+//    }
 
     @Transactional(readOnly = true)
     public Set<Step> selectStepByRecipe(Recipe recipe) {

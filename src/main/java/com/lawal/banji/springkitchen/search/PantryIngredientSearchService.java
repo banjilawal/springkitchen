@@ -1,6 +1,6 @@
 package com.lawal.banji.springkitchen.search;
 
-import com.lawal.banji.springkitchen.food.Food;
+import com.lawal.banji.springkitchen.food.model.Food;
 import com.lawal.banji.springkitchen.pantry.PantryItem;
 import com.lawal.banji.springkitchen.pantry.PantryItemService;
 import org.slf4j.Logger;

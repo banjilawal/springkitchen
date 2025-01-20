@@ -1,12 +1,12 @@
 package com.lawal.banji.springkitchen.seeder;
 
 import com.lawal.banji.springkitchen.dataset.StepStatementDataset;
-import com.lawal.banji.springkitchen.food.Food;
-import com.lawal.banji.springkitchen.food.FoodService;
+import com.lawal.banji.springkitchen.food.model.Food;
+import com.lawal.banji.springkitchen.food.service.FoodService;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
-import com.lawal.banji.springkitchen.recipe.model.Step;
+import com.lawal.banji.springkitchen.step.model.Step;
 import com.lawal.banji.springkitchen.recipe.service.RecipeService;
-import com.lawal.banji.springkitchen.recipe.service.StepService;
+import com.lawal.banji.springkitchen.step.service.StepService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,8 +60,8 @@ public class StepSeederService {
     private Double ingredientAmount () { return random.nextDouble(11.0);}
 
     private Food ingredient (Recipe recipe) {
-        Food food = foodService.randomIngredient();
-        while (recipe.filterStepsByIngredient(food) != null) foodService.randomIngredient();
+        Food food = foodService.randomFood();
+        while (recipe.filterStepsByIngredient(food) != null) foodService.randomFood();
         return food;
     }
 

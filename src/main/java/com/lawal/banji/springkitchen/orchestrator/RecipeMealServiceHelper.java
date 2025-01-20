@@ -1,12 +1,13 @@
 package com.lawal.banji.springkitchen.orchestrator;
 
-import com.lawal.banji.springkitchen.food.Food;
+import com.lawal.banji.springkitchen.food.model.Food;
+import com.lawal.banji.springkitchen.global.AppLogger;
 import com.lawal.banji.springkitchen.meal.MealService;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
-import com.lawal.banji.springkitchen.recipe.model.Step;
-import com.lawal.banji.springkitchen.food.FoodService;
+import com.lawal.banji.springkitchen.step.model.Step;
+import com.lawal.banji.springkitchen.food.service.FoodService;
 import com.lawal.banji.springkitchen.recipe.service.RecipeService;
-import com.lawal.banji.springkitchen.recipe.service.StepService;
+import com.lawal.banji.springkitchen.step.service.StepService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,9 @@ public class RecipeMealServiceHelper {
 
     // Recipe Creation
     @Transactional
-    public Recipe saveRecipe(Recipe recipe) { return recipeService.save(recipe); }
+    public Recipe saveRecipe(Recipe recipe) {
+        return recipeService.save(recipe);
+    }
 
     // Recipe Reading
     @Transactional(readOnly = true)
@@ -70,60 +73,46 @@ public class RecipeMealServiceHelper {
 
     // Recipe Deleting
     @Transactional
-    public void deleteRecipe(Long id) { recipeService.deleteById(id); }
-
-    // Recipe Validation
-    @Transactional(readOnly = true)
-    public boolean isValidRecipe(Recipe recipe) { return recipeService.isValidRecipe(recipe); }
-
-    @Transactional(readOnly = true)
-    public boolean isValidRecipeUpdate(Long targetId, Recipe source) { return recipeService.areValidUpdateParameters(targetId, source); }
+    public void deleteRecipeById(Long id) { recipeService.deleteById(id); }
 
     /* FoodService Operations */
 
     // Food Creating
     @Transactional
-    public Food saveIngredient(Food food) {
+    public Food saveFood(Food food) {
+        AppLogger.debug(RecipeMealServiceHelper.class, "saveFood() called with: food = [" + food + "]");
         return foodService.save(food);
     }
 
     // Food Reading
     @Transactional(readOnly = true)
-    public Long countIngredients() { return foodService.count(); }
+    public Long countFoods() { return foodService.count(); }
 
     @Transactional(readOnly = true)
-    public Food findIngredientById(Long id) { return foodService.findById(id); }
+    public Food findFoodById(Long id) { return foodService.findById(id); }
 
     @Transactional(readOnly = true)
-    public Food findIngredientByName(String name) { return foodService.findByName(name); }
+    public Food findFoodByName(String name) { return foodService.findByName(name); }
 
     @Transactional(readOnly = true)
-    public List<Food> findAllIngredients() { return foodService.findAll(); }
+    public List<Food> findAllFoods() { return foodService.findAll(); }
 
     @Transactional(readOnly = true)
-    public Set<Food> searchIngredients(String string) { return foodService.search(string); }
+    public Set<Food> searchFoods(String string) { return foodService.search(string); }
 
     @Transactional(readOnly = true)
-    public Food getRandomIngredient() { return foodService.randomIngredient(); }
+    public Food getRandomFood() { return foodService.randomFood(); }
 
     // Food Updating
     @Transactional
-    public Food updateIngredient(Long targetId, Food source) {
+    public Food updateFood(Long targetId, Food source) {
         return foodService.update(targetId, source);
     }
 
     // Food Deleting
     @Transactional
-    public void deleteIngredient(Long id) { foodService.deleteById(id); }
+    public void deleteFoodById(Long id) { foodService.deleteById(id); }
 
-    // Food Validation
-    @Transactional(readOnly = true)
-    public boolean isValidIngredient(Food food) { return foodService.isValidIngredient(food); }
-
-    @Transactional(readOnly = true)
-    public boolean isValidIngredientUpdate(Long targetId, Food source) {
-        return foodService.areValidUpdateParameters(targetId, source);
-    }
 
     /* StepService Operations */
 
@@ -153,14 +142,5 @@ public class RecipeMealServiceHelper {
 
     // Step Deleting
     @Transactional
-    public void deleteStep(Long id) { stepService.deleteById(id); }
-
-    // Step Validation
-    @Transactional(readOnly = true)
-    public boolean isValidStep(Step step) { return stepService.isValidStep(step); }
-
-    @Transactional(readOnly = true)
-    public boolean isValidStepUpdate(Long targetId, Step source) {
-        return stepService.areValidUpdateParameters(targetId, source);
-    }
+    public void deleteStepById(Long id) { stepService.deleteById(id); }
 }

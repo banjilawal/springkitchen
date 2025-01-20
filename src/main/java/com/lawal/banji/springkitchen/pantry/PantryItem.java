@@ -23,8 +23,6 @@ public  class PantryItem {
     public static final String REORDER_LEVEL_MUST_NOT_BE_NULL_OR_LESS_THAN_ZERO = "Reorder level must not be null or less than 0";
     public static final String QUANTITY_IN_STOCK_MUST_NOT_BE_NULL_OR_LESS_THAN_ZERO = "Quantity cannot be null or less than 0";
 
-    /* logger */
-    private static final Logger logger = LoggerFactory.getLogger(Ingredient.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -113,15 +111,11 @@ public  class PantryItem {
     public void setId(Long id) { this.id = id; }
 
     public void setName (String name) {
-        if (name == null || name.trim().isBlank())
-            loggingExceptionHandler(PANTRY_ITEM_NAME_CANNOT_BE_NULL_OR_BLANK);
-        else { this.name = name.trim(); }
+         this.name = name.trim();
     }
 
     public void setReorderLevel(Long reorderLevel) {
-        if (reorderLevel== null || reorderLevel< 0)
-            loggingExceptionHandler(REORDER_LEVEL_MUST_NOT_BE_NULL_OR_LESS_THAN_ZERO);
-        else { this.reorderLevel = reorderLevel; }
+        this.reorderLevel = reorderLevel;
     }
 
     /*
@@ -131,35 +125,24 @@ public  class PantryItem {
         instead.
     * */
     public void setQuantityInStock(Long quantityInStock) {
-        if (quantityInStock == null || quantityInStock < 0)
-            loggingExceptionHandler(QUANTITY_IN_STOCK_MUST_NOT_BE_NULL_OR_LESS_THAN_ZERO);
-        else { this.quantityInStock = quantityInStock; }
+        this.quantityInStock = quantityInStock;
     }
 
     public void increaseQuantityInStock(Long amount) {
-        if (amount == null || amount < 0) loggingExceptionHandler(AMOUNT_CANNOT_BE_NULL_OR_LESS_THAN_ZERO);
-        else {this.quantityInStock += amount; }
+        this.quantityInStock += amount;
     }
 
     public void decreaseQuantityInStock(Long amount) {
-        if (amount == null || amount < 0 || amount > quantityInStock) loggingExceptionHandler(AMOUNT_CANNOT_BE_NULL_OR_LESS_THAN_ZERO);
-        else {this.quantityInStock -= amount; }
+        this.quantityInStock -= amount;
     }
 
     /* Update methods */
     public void getUpdate(PantryItem source) {
         if (source == this) return;
 
-        if (source == null) loggingExceptionHandler(PANTRY_ITEM_UPDATE_SOURCE_CANNOT_BE_NULL);
-        else if (source.getId() == null || !id.equals(source.getId())) loggingExceptionHandler(INVALID_UPDATE_SOURCE_ID);
-        else if (source.getName() == null || source.getName().trim().isEmpty()) loggingExceptionHandler(PANTRY_ITEM_NAME_CANNOT_BE_NULL_OR_BLANK);
-        else if (source.getReorderLevel() == null || source.getReorderLevel() < 0) loggingExceptionHandler(REORDER_LEVEL_MUST_NOT_BE_NULL_OR_LESS_THAN_ZERO);
-        else if (source.getQuantityInStock() == null || source.getQuantityInStock() < 0) loggingExceptionHandler(QUANTITY_IN_STOCK_MUST_NOT_BE_NULL_OR_LESS_THAN_ZERO);
-        else {
-            setName(source.getName());
-            setReorderLevel(source.getReorderLevel());
-            setQuantityInStock(source.getQuantityInStock());
-        }
+        setName(source.getName());
+        setReorderLevel(source.getReorderLevel());
+        setQuantityInStock(source.getQuantityInStock());
     }
 
     /* Equals and hash methods */
@@ -186,12 +169,5 @@ public  class PantryItem {
             + " name:" + name
             + " quantityInStock:" + quantityInStock
             + " reorderLevel:" + reorderLevel + ']';
-    }
-
-
-    /* logging methods */
-    public void loggingExceptionHandler (String errorMessage) {
-        logger.error(errorMessage);
-        throw new IllegalArgumentException(errorMessage);
     }
 }
