@@ -7,17 +7,24 @@ import com.lawal.banji.springkitchen.recipe.model.Recipe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/api/food")
 public class FoodRestController {
 
 
+    private RestTemplate restTemplate;
     private final RecipeMealServiceHelper recipeMealServiceHelper;
     private final RecipeMealOrchestratorService recipeMealOrchestratorService;
 
     @Autowired
-    public FoodRestController(RecipeMealServiceHelper recipeMealServiceHelper, RecipeMealOrchestratorService recipeMealOrchestratorService) {
+    public FoodRestController(
+        RestTemplate restTemplate,
+        RecipeMealServiceHelper recipeMealServiceHelper,
+        RecipeMealOrchestratorService recipeMealOrchestratorService
+    ) {
+        this.restTemplate = restTemplate;
         this.recipeMealServiceHelper = recipeMealServiceHelper;
         this.recipeMealOrchestratorService = recipeMealOrchestratorService;
     }

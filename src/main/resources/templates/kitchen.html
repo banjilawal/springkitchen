@@ -8,6 +8,7 @@
 </head>
 <body>
 <nav class="nav" id="siteNav">
+    <span><a th:href="@{/kitchen/food}">Foods</a></span>
     <span><a th:href="@{/kitchen/pantryItem}">Pantry</a></span>
     <span><a th:href="@{/kitchen/recipe}">Recipes</a></span>
     <span><a th:href="@{/kitchen/recipe/directions}">Directions</a></span>
@@ -16,61 +17,57 @@
     <h1>Welcome to Kitchen System</h1>
     <p>Choose a module to get started:</p>
     <nav class="nav" id="homeNav">
+        <span><a th:href="@{/kitchen/food}">List of Foods</a></span>
         <span><a th:href="@{/kitchen/pantryItem}">Manage Pantry</a></span>
         <span><a th:href="@{/kitchen/recipe}">Manage Recipes</a></span>
     </nav>
 </div>
+<!-- FOOD DASHBOARD -->
 <div class="dashboard" id="foodDashboard" th:if="${dashboard == 'foodDashboard'}">
-    <h1 th:text="${#strings.isEmpty(pageHeading) ? 'Pantry Management'  : pageHeading}"></h1>
-    <nav class="nav" id="pantryNav">
-        <span><a th:href="@{/kitchen/pantryItem/form}">Add New Pantry Item</a></span>
-        <form id="pantrySearchForm" th:action="@{/kitchen/pantryItem/search}" th:method="get">
+    <h1 th:text="${#strings.isEmpty(pageHeading) ? 'Foods'  : pageHeading}"></h1>
+    <nav class="nav" id="foodNav">
+        <span><a th:href="@{/kitchen/food/form}">Add New a New Food</a></span>
+        <form id="foodSearchForm" th:action="@{/kitchen/food/search}" th:method="get">
             <input type="text" name="string" placeholder="...">
             <input type="submit" value="Search Pantry">
         </form>
     </nav>
-    <div class="view" id="inventoryView" th:if="${view == 'inventoryView'}">
-        <table>
+    <div class="view" id="foodListView" th:if="${view == 'foodListView'}">
+        <table id="foodTable">
             <thead>
             <tr>
                 <th>Id</th>
                 <th>Name</th>
-                <th>Quantity In Stock</th>
-                <th>Reorder Threshold</th>
             </tr>
             </thead>
             <tbody>
-            <tr th:each="pantryItem, iterStat: ${pantryItems}" th:onclick="|location.href='@{/kitchen/pantryItem/{id}(id=${pantryItem.id})}'|">
-                <td class="id" th:text="${pantryItem.id}"></td>
-                <td class="name" th:text="${pantryItem.name}"></td>
-                <td class="quantityInStock" th:text="${pantryItem.quantityInStock}"></td>
-                <td class="reorderLevel" th:text="${pantryItem.reorderLevel}"></td>
+            <tr th:each="food, iterStat: ${foods}" th:onclick="|location.href='@{/kitchen/food/{id}(id=${food.id})}'|">
+                <td class="id" th:text="${food.id}"></td>
+                <td class="name" th:text="${food.name}"></td>
             </tr>
             </tbody>
         </table>
     </div>
     <div class="view" id="foodView" th:if="${view == 'foodView'}">
-        <table id="foodTable">
+        <table id="foodDetails">
             <thead>
-                <tr><th>Field</th><th>Value</th></tr>
+            <tr><th>Field</th><th>Value</th></tr>
             </thead>
             <tbody>
-                <tr class="id"><td>Id</td><td th:text="${pantryItem.id}"></td></tr>
-                <tr class="name"><td>Name</td><td th:text="${pantryItem.name}"></td></tr>
-                <tr class="quantityInStock"><td>Quantity in Stock</td><td th:text="${pantryItem.quantityInStock}"></td></tr>
-                <tr class="reorderLevel"><td>Reorder Level</td><td th:text="${pantryItem.reorderLevel}"></td></tr>
+            <tr class="id"><td>Id</td><td th:text="${food.id}"></td></tr>
+            <tr class="name"><td>Name</td><td th:text="${food.name}"></td></tr>
             </tbody>
         </table>
         <nav>
-            <a th:href="@{/kitchen/pantryItem/form/{id}(id=${pantryItem.id})}">Edit</a>
-            <a th:href="@{/kitchen/pantryItem/{id}/delete(id=${pantryItem.id})}">Delete</a>
+            <a th:href="@{/kitchen/food/form/{id}(id=${food.id})}">Edit</a>
+            <a th:href="@{/kitchen/food/{id}/delete(id=${food.id})}">Delete</a>
         </nav>
     </div>
     <div class="view" id="foodFormView" th:if="${view == 'foodFormView'}">
         <form id="foodForm"
-            th:action="${pantryItem.id == null ? '/kitchen/pantryItem' : '/kitchen/pantryItem/' + pantryItem.id}"
-            th:method="${pantryItem.id == null ? 'post' : 'put'}"
-            th:object="${pantryItem}"
+            th:action="${food.id == null ? '/kitchen/food' : '/kitchen/food/' + food.id}"
+            th:method="${food.id == null ? 'post' : 'put'}"
+            th:object="${food}"
         >
             <fieldset>
                 <label for="foodId">Id</label>
@@ -83,16 +80,6 @@
                 <p th:if="${#fields.hasErrors('name')}" th:errorclass="error" th:errors="*{name}"></p>
             </fieldset>
             <fieldset>
-                <label for="quantityInStock">Quantity In Stock</label>
-                <input type="number" id="quantityInStock" min="0" max="200" required th:field="*{quantityInStock}">
-                <p th:if="${#fields.hasErrors('quantityInStock')}" th:errorclass="error" th:errors="*{quantityInStock}"></p>
-            </fieldset>
-            <fieldset>
-                <label for="reorderLevel">Reorder Threshold</label>
-                <input type="number" id="reorderLevel" min="0" max="200" required th:field="*{reorderLevel}">
-                <p th:if="${#fields.hasErrors('reorderLevel')}" th:errorclass="error" th:errors="*{reorderLevel}"></p>
-            </fieldset>
-            <fieldset>
                 <input type="submit" value="Save">
             </fieldset>
         </form>
@@ -101,200 +88,301 @@
         <p class="warning" th:text="${#strings.isEmpty(warningMessage) ? 'Deletion removes all items referencing the item' : warningMessage}"></p>
         <form
             id="deleteFoodForm"
-            th:action="@{/kitchen/pantryItem/{id}/delete(id=${pantryItem.id})}"
+            th:action="@{/kitchen/food/{id}/delete(id=${food.id})}"
             th:method="post"
-            th:object="${pantryItem}">
-<!--            <input type="hidden" name="_method" value="delete">-->
+            th:object="${food}">
+        <!--            <input type="hidden" name="_method" value="delete">-->
             <fieldset class="actionGroup">
-                <nav class="actionNav" id="deleteTaskActionNav">
-                    <a class="cancel" th:href="@{/kitchen/pantryItem/{id}(id=*{id})}" th:text="${'Do not Delete'}"></a>
-                    <input type="submit" class="delete" id="deleteTaskButton" value="Delete Now">
+                <nav class="actionNav" id="deleteFoodActionNav">
+                    <a class="cancel" th:href="@{/kitchen/food/{id}(id=*{id})}" th:text="${'Do not Delete'}"></a>
+                    <input type="submit" class="delete" id="deleteFoodButton" value="Delete Now">
                 </nav>
             </fieldset>
         </form>
-        <!--end deleteTaskView-->
+        <!--end deleteFoodView-->
     </div>
 </div>
-<div class="dashboard" id="recipeDashboard" th:if="${dashboard == 'recipeDashboard'}">
-    <h1 th:text="${#strings.isEmpty(pageHeading) ? 'Recipe Management'  : pageHeading}"></h1>
-    <nav class="nav" id="recipeNav">
-        <span><a th:href="@{/kitchen/recipe/form}">Add New Recipe</a></span>
-        <form id="recipeSearchForm" th:action="@{/kitchen/recipe/search}" th:method="get">
-            <label for="recipeSearchField"><input type="text" id="recipeSearchField" name="string" placeholder="..."></label>
-            <input type="submit" value="Search Recipes">
-        </form>
-    </nav>
-    <div class="view" id="recipeListView" th:if="${view == 'recipeListView'}">
-        <table>
-            <thead>
-            <tr>
-                <th>Id</th>
-                <th>Title</th>
-                <th>Description</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="recipe, iterStat: ${recipes}" th:onclick="|location.href='@{/kitchen/recipe/{id}(id=${recipe.id})}'|">
-                <td class="id" th:text="${iterStat.index + 1}"></td>
-                <td class="title" th:text="${recipe.metadata.title}"></td>
-                <td class="description" th:text="${recipe.metadata.description}"></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="view" id="recipeView" th:if="${view == 'recipeView'}">
-        <h1 th:text="${recipe.metadata.title}"></h1>
-        <p th:text="${recipe.metadata.description}"></p>
-        <table id="recipeTable">
-            <thead>
-                <tr><th>Step</th><th>Duration</th><th>Ingredient</th><th>Ingredient Amount</th><th>Directions</th></tr>
-            </thead>
-            <tbody>
-                <tr th:each="step, iterStat: ${recipe.steps}"
-                    th:onclick="|location.href='@{/kitchen/recipe/{recipeId}/step/{stepId}(recipeId=${recipe.id}, stepId=${step.id})}'|">
-                    <td th:text="${iterStat.index + 1}"></td>
-                    <td th:text="${step.durationMinutes}"></td>
-                    <td th:text="${step.food.name}"></td>
-                    <td th:text="${step.ingredientAmount}"></td>
-                    <td th:text="${step.directions}"></td>
-                </tr>
-            </tbody>
-        </table>
-        <nav>
-            <a th:href="@{/kitchen/recipe/form/{id}(id=${recipe.id})}">Edit</a>
-            <a th:href="@{/kitchen/recipe/{id}/delete(id=${recipe.id})}">Delete</a>
-        </nav>
-    </div>
-    <p th:text="${stepCount}"></p>
-    <div class="view" id="recipeFormView" th:if="${view == 'recipeFormView'}">
-        <form id="recipeForm"
-          th:action="${recipe.id == null ? '/kitchen/recipe' : '/kitchen/recipe/' + recipe.id }"
-          th:method="${recipe.id == null ? 'post' : 'post'}"
-          th:object="${recipe}"
-        >
-            <fieldset>
-                <label for="recipeId">Id</label>
-                <input type="text" id="recipeId" readonly th:field="*{id}">
-            </fieldset>
-            <fieldset>
-                <label for="recipeTitle">Title</label>
-                <input type="text" id="recipeTitle" th:field="*{metadata.title}" required>
-                    <p th:if="${#fields.hasErrors('metadata.title')}" th:errors="*{metadata.title}"></p>
-            </fieldset>
-            <fieldset>
-                <label for="recipeDescription">Description</label>
-                <textarea id="recipeDescription" th:field="*{metadata.description}" required></textarea>
-                    <p th:if="${#fields.hasErrors('metadata.description')}" th:errors="*{metadata.description}"></p>
-            </fieldset>
-            <fieldset>
-                <h2>Steps</h2>
-                <table id="stepsTable">
-                    <thead><tr><th>Index</th><th>Minutes</th><th>Ingredient</th><th>Amount</th><th>Directions</th></tr></thead>
-                    <tbody id="stepsTableBody">
-                        <tr th:each="step, iterStat : *{steps}">
-                            <td th:text="${iterStat.index + 1}"></td>
-                            <td>
-                                <input type="text" th:field="*{steps[__${iterStat.index}__].durationMinutes}" min="0" placeholder="Duration (min)"/>
-                            </td>
-                            <td>
-                                <input type="text" th:field="*{steps[__${iterStat.index}__].food.name}" placeholder="Ingredient" required/>
-                            </td>
-                            <td>
-                                <input type="text" th:field="*{steps[__${iterStat.index}__].ingredientAmount}" min="0" placeholder="ingredientAmount"/>
-                            </td>
-                            <td>
-                                <input type="text" th:field="*{steps[__${iterStat.index}__].directions}" placeholder="Directions" required/>
-                            </td>
-                            <td>
-                                <button type="button" onclick="removeStep(this)">Remove</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <!-- Add Step Button -->
-                <button type="button" onclick="addStep()">Add Step</button>
-            </fieldset>
-            <button type="submit">Save Recipe</button>
-        </form>
-        <script>
-            /**
-             * Add a new step dynamically to the table
-             */
-            function addStep() {
-                const tableBody = document.getElementById('stepsTableBody');
-                const stepIndex = tableBody.children.length;
+<!-- RECIPE DASHBOARD -->
+<!--<div class="dashboard" id="recipeDashboard" th:if="${dashboard == 'recipeDashboard'}">-->
+<!--    <h1 th:text="${#strings.isEmpty(pageHeading) ? 'Recipe Management'  : pageHeading}"></h1>-->
+<!--    <nav class="nav" id="recipeNav">-->
+<!--        <span><a th:href="@{/kitchen/recipe/form}">Add New Recipe</a></span>-->
+<!--        <form id="recipeSearchForm" th:action="@{/kitchen/recipe/search}" th:method="get">-->
+<!--            <label for="recipeSearchField"><input type="text" id="recipeSearchField" name="string" placeholder="..."></label>-->
+<!--            <input type="submit" value="Search Recipes">-->
+<!--        </form>-->
+<!--    </nav>-->
+<!--    <div class="view" id="recipeListView" th:if="${view == 'recipeListView'}">-->
+<!--        <table id="recipeTable">-->
+<!--            <thead>-->
+<!--            <tr>-->
+<!--                <th>Id</th>-->
+<!--                <th>Title</th>-->
+<!--                <th>Description</th>-->
+<!--            </tr>-->
+<!--            </thead>-->
+<!--            <tbody>-->
+<!--            <tr th:each="recipe, iterStat: ${recipes}" th:onclick="|location.href='@{/kitchen/recipe/{id}(id=${recipe.id})}'|">-->
+<!--                <td class="id" th:text="${iterStat.index + 1}"></td>-->
+<!--                <td class="title" th:text="${recipe.title}"></td>-->
+<!--                <td class="description" th:text="${recipe.description}"></td>-->
+<!--&lt;!&ndash;                <td class="recipeIngredients" th:text="$recipe.getIngredients()}"></td>&ndash;&gt;-->
+<!--            </tr>-->
+<!--            </tbody>-->
+<!--        </table>-->
+<!--    </div>-->
+<!--    <div class="view" id="recipeView" th:if="${view == 'recipeView'}">-->
+<!--        <h1 th:text="${recipe.title}"></h1>-->
+<!--        <p th:text="${recipe.description}"></p>-->
+<!--        <table id="recipeStepsTable">-->
+<!--            <thead>-->
+<!--                <tr><th>Step</th><th>Duration</th><th>Ingredient</th><th>Ingredient Amount</th><th>Directions</th></tr>-->
+<!--            </thead>-->
+<!--            <tbody>-->
+<!--                <tr th:each="step, iterStat: ${recipe.steps}"-->
+<!--                    th:onclick="|location.href='@{/kitchen/recipe/{recipeId}/step/{stepId}(recipeId=${recipe.id}, stepId=${step.id})}'|">-->
+<!--                    <td th:text="${iterStat.index + 1}"></td>-->
+<!--                    <td th:text="${step.durationMinutes}"></td>-->
+<!--                    <td th:text="${step.ingredient.name}"></td>-->
+<!--                    <td th:text="${step.ingredientAmount}"></td>-->
+<!--                    <td th:text="${step.directions}"></td>-->
+<!--                </tr>-->
+<!--            </tbody>-->
+<!--        </table>-->
+<!--        <nav>-->
+<!--            <a th:href="@{/kitchen/recipe/form/{id}(id=${recipe.id})}">Edit</a>-->
+<!--            <a th:href="@{/kitchen/recipe/{id}/delete(id=${recipe.id})}">Delete</a>-->
+<!--        </nav>-->
+<!--    </div>-->
+<!--    <p th:text="${stepCount}"></p>-->
+<!--    <div class="view" id="recipeFormView" th:if="${view == 'recipeFormView'}">-->
+<!--        <form id="recipeForm"-->
+<!--          th:action="${recipe.id == null ? '/kitchen/recipe' : '/kitchen/recipe/' + recipe.id }"-->
+<!--          th:method="${recipe.id == null ? 'post' : 'post'}"-->
+<!--          th:object="${recipe}"-->
+<!--        >-->
+<!--            <fieldset>-->
+<!--                <label for="recipeId">Id</label>-->
+<!--                <input type="text" id="recipeId" readonly th:field="*{id}">-->
+<!--            </fieldset>-->
+<!--            <fieldset>-->
+<!--                <label for="recipeTitle">Title</label>-->
+<!--                <input type="text" id="recipeTitle" th:field="*{title}" required>-->
+<!--                    <p th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>-->
+<!--            </fieldset>-->
+<!--            <fieldset>-->
+<!--                <label for="recipeDescription">Description</label>-->
+<!--                <textarea id="recipeDescription" th:field="*{description}" required></textarea>-->
+<!--                    <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></p>-->
+<!--            </fieldset>-->
+<!--            <fieldset>-->
+<!--                <h2>Steps</h2>-->
+<!--                <table id="stepsTable">-->
+<!--                    <thead><tr><th>Index</th><th>Minutes</th><th>Ingredient</th><th>Amount</th><th>Directions</th></tr></thead>-->
+<!--                    <tbody id="stepsTableBody">-->
+<!--                        <tr th:each="step, iterStat : *{steps}">-->
+<!--                            <td th:text="${iterStat.index + 1}"></td>-->
+<!--                            <td>-->
+<!--                                <input type="text" th:field="*{steps[__${iterStat.index}__].durationMinutes}" min="0" placeholder="Duration (min)"/>-->
+<!--                            </td>-->
+<!--                            <td>-->
+<!--                                <input type="text" th:field="*{steps[__${iterStat.index}__].ingredient.name}" placeholder="Ingredient" required/>-->
+<!--                            </td>-->
+<!--                            <td>-->
+<!--                                <input type="text" th:field="*{steps[__${iterStat.index}__].ingredientAmount}" min="0" placeholder="ingredientAmount"/>-->
+<!--                            </td>-->
+<!--                            <td>-->
+<!--                                <input type="text" th:field="*{steps[__${iterStat.index}__].directions}" placeholder="Directions" required/>-->
+<!--                            </td>-->
+<!--                            <td>-->
+<!--                                <button type="button" onclick="removeStep(this)">Remove</button>-->
+<!--                            </td>-->
+<!--                        </tr>-->
+<!--                    </tbody>-->
+<!--                </table>-->
+<!--                &lt;!&ndash; Add Step Button &ndash;&gt;-->
+<!--                <button type="button" onclick="addStep()">Add Step</button>-->
+<!--            </fieldset>-->
+<!--            <button type="submit">Save Recipe</button>-->
+<!--        </form>-->
+<!--        <script>-->
+<!--            /**-->
+<!--             * Add a new step dynamically to the table-->
+<!--             */-->
+<!--            function addStep() {-->
+<!--                const tableBody = document.getElementById('stepsTableBody');-->
+<!--                const stepIndex = tableBody.children.length;-->
 
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td>${stepIndex + 1}</td>
-                    <td><input type="number" name="steps[${stepIndex}].durationMinutes" value="0" placeholder="Minutes" /></td>
-                    <td><input type="text" name="steps[${stepIndex}].food.name" value="Default Ingredient" required /></td>
-                    <td><input type="number" name="steps[${stepIndex}].ingredientAmount" value="1" placeholder="Amount" /></td>
-                    <td><input type="text" name="steps[${stepIndex}].directions" value="Default direction" required /></td>
-                    <td><button type="button" onclick="removeStep(this)">Remove</button></td>
-                `;
-                tableBody.appendChild(newRow);
-            }
-            function removeStep(button) {
-                const row = button.closest('tr');
-                row.remove(); // Remove the row from the table
+<!--                const newRow = document.createElement('tr');-->
+<!--                newRow.innerHTML = `-->
+<!--                    <td>${stepIndex + 1}</td>-->
+<!--                    <td><input type="number" name="steps[${stepIndex}].durationMinutes" value="0" placeholder="Minutes" /></td>-->
+<!--                    <td><input type="text" name="steps[${stepIndex}].food.name" value="Default Ingredient" required /></td>-->
+<!--                    <td><input type="number" name="steps[${stepIndex}].ingredientAmount" value="1" placeholder="Amount" /></td>-->
+<!--                    <td><input type="text" name="steps[${stepIndex}].directions" value="Default direction" required /></td>-->
+<!--                    <td><button type="button" onclick="removeStep(this)">Remove</button></td>-->
+<!--                `;-->
+<!--                tableBody.appendChild(newRow);-->
+<!--            }-->
+<!--            function removeStep(button) {-->
+<!--                const row = button.closest('tr');-->
+<!--                row.remove(); // Remove the row from the table-->
 
-                // Re-index the remaining rows to maintain consistency
-                const tableBody = document.getElementById('stepsTableBody');
-                const rows = tableBody.children;
-                for (let i = 0; i < rows.length; i++) {
-                    // Adjust the names for each remaining field
-                    rows[i].querySelector('input[name$=".durationMinutes"]').name = `steps[${i}].durationMinutes`;
-                    rows[i].querySelector('input[name$=".food.name"]').name = `steps[${i}].food.name`;
-                    rows[i].querySelector('input[name$=".ingredientAmount"]').name = `steps[${i}].ingredientAmount`;
-                    rows[i].querySelector('input[name$=".directions"]').name = `steps[${i}].directions`;
-                }
-            }
-        </script>
-<!--end RecipeForm-->
-    </div>
-    <div class="view" id="deleteRecipeView" th:if="${view == 'deleteRecipeView'}">
-        <p class="warning" th:text="${#strings.isEmpty(warningMessage) ? 'Deletion removes all items referencing the item' : warningMessage}"></p>
-        <form
-            id="deleteRecipeForm"
-            th:action="@{/kitchen/recipe/{id}/delete(id=${recipe.id})}"
-            th:method="post"
-            th:object="${recipe}"
-        >
-        <fieldset class="actionGroup">
-            <nav class="actionNav" id="deleteRecipeActionNav">
-                <a class="cancel" th:href="@{/kitchen/recipe/{id}(id=*{id})}" th:text="${'Do not Delete'}"></a>
-                <input type="submit" class="delete" id="deleteRecipeButton" value="Delete Now">
-            </nav>
-        </fieldset>
-        </form>
-        <!--end deleteRecipeView-->
-    </div>
-    <div class="view" id="recipeStepFormView" th:if="${view == 'recipeStepFormView'}">
-        <form id="recipeStepForm"
-              th:action="@{/kitchen/recipe/{id}/step(id=${recipe.id})}"
-              th:method="post"
-              th:object="${recipe}"
-        ></form>
-    </div >
-    <div class="view" id="stepView" th:if="${view == 'stepView'}">
-        <a th:href="@{/kitchen/recipe/{recipeId}(recipeId=${recipe.id})}">Back to REcipe</a>
-        <table>
-            <thead>
-                <tr><th>Id</th><th>Duration</th><th>Ingredient</th><th>Ingredient Amount</th><th>Directions</th></tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td th:text="${step.id}"></td>
-                <td th:text="${step.durationMinutes}"></td>
-                <td th:text="${step.food.name}"></td>
-                <td th:text="${step.food.amount}"></td>
-                <td th:text="${step.directions}"></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    </div>
+<!--                // Re-index the remaining rows to maintain consistency-->
+<!--                const tableBody = document.getElementById('stepsTableBody');-->
+<!--                const rows = tableBody.children;-->
+<!--                for (let i = 0; i < rows.length; i++) {-->
+<!--                    // Adjust the names for each remaining field-->
+<!--                    rows[i].querySelector('input[name$=".durationMinutes"]').name = `steps[${i}].durationMinutes`;-->
+<!--                    rows[i].querySelector('input[name$=".food.name"]').name = `steps[${i}].food.name`;-->
+<!--                    rows[i].querySelector('input[name$=".ingredientAmount"]').name = `steps[${i}].ingredientAmount`;-->
+<!--                    rows[i].querySelector('input[name$=".directions"]').name = `steps[${i}].directions`;-->
+<!--                }-->
+<!--            }-->
+<!--        </script>-->
+<!--&lt;!&ndash;end RecipeForm&ndash;&gt;-->
+<!--    </div>-->
+<!--    <div class="view" id="deleteRecipeView" th:if="${view == 'deleteRecipeView'}">-->
+<!--        <p class="warning" th:text="${#strings.isEmpty(warningMessage) ? 'Deletion removes all items referencing the item' : warningMessage}"></p>-->
+<!--        <form-->
+<!--            id="deleteRecipeForm"-->
+<!--            th:action="@{/kitchen/recipe/{id}/delete(id=${recipe.id})}"-->
+<!--            th:method="post"-->
+<!--            th:object="${recipe}"-->
+<!--        >-->
+<!--        <fieldset class="actionGroup">-->
+<!--            <nav class="actionNav" id="deleteRecipeActionNav">-->
+<!--                <a class="cancel" th:href="@{/kitchen/recipe/{id}(id=*{id})}" th:text="${'Do not Delete'}"></a>-->
+<!--                <input type="submit" class="delete" id="deleteRecipeButton" value="Delete Now">-->
+<!--            </nav>-->
+<!--        </fieldset>-->
+<!--        </form>-->
+<!--        &lt;!&ndash;end deleteRecipeView&ndash;&gt;-->
+<!--    </div>-->
+<!--    <div class="view" id="recipeStepFormView" th:if="${view == 'recipeStepFormView'}">-->
+<!--        <form id="recipeStepForm"-->
+<!--              th:action="@{/kitchen/recipe/{id}/step(id=${recipe.id})}"-->
+<!--              th:method="post"-->
+<!--              th:object="${recipe}"-->
+<!--        ></form>-->
+<!--    </div >-->
+<!--    <div class="view" id="stepView" th:if="${view == 'stepView'}">-->
+<!--        <a th:href="@{/kitchen/recipe/{recipeId}(recipeId=${recipe.id})}">Back to Recipe</a>-->
+<!--        <table>-->
+<!--            <thead>-->
+<!--                <tr><th>Id</th><th>Ingredient</th><th>Ingredient Amount</th><th>Directions</th></tr>-->
+<!--            </thead>-->
+<!--            <tbody>-->
+<!--            <tr>-->
+<!--                <td th:text="${step.id}"></td>-->
+<!--&lt;!&ndash;                <td th:text="${step.durationMinutes}"></td>&ndash;&gt;-->
+<!--                <td th:text="${step.ingredient.name}"></td>-->
+<!--                <td th:text="${step.ingredientAmount}"></td>-->
+<!--                <td th:text="${step.directions}"></td>-->
+<!--            </tr>-->
+<!--            </tbody>-->
+<!--        </table>-->
+<!--    </div>-->
+<!--    </div>-->
+<!-- PANTRY DASHBOARD -->
+<!--<div class="dashboard" id="pantryDashboard" th:if="${dashboard == 'pantryDashboard'}">-->
+<!--    <h1 th:text="${#strings.isEmpty(pageHeading) ? 'Pantry Management'  : pageHeading}"></h1>-->
+<!--    <nav class="nav" id="pantryNavBar">-->
+<!--        <span><a th:href="@{/kitchen/pantry/form}">Add New Pantry Item</a></span>-->
+<!--        <form id="pantrySearchForm" th:action="@{/kitchen/pantry/search}" th:method="get">-->
+<!--            <input type="text" name="string" placeholder="...">-->
+<!--            <input type="submit" value="Search Pantry">-->
+<!--        </form>-->
+<!--    </nav>-->
+<!--    &lt;!&ndash;end pantryNavBar&ndash;&gt;-->
+<!--    <div class="view" id="pantryView" th:if="${view == 'pantryView'}">-->
+<!--        <table id="pantryTable">-->
+<!--            <thead>-->
+<!--            <tr>-->
+<!--                <th>Id</th><th>Name</th><th>Quantity In Stock</th><th>Reorder Threshold</th>-->
+<!--            </tr>-->
+<!--            </thead>-->
+<!--            <tbody>-->
+<!--            <tr th:each="pantryItem, iterStat: ${pantryItems}" th:onclick="|location.href='@{/kitchen/pantry/{id}(id=${pantryItem.id})}'|">-->
+<!--                <td class="id" th:text="${pantryItem.id}"></td>-->
+<!--                <td class="name" th:text="${pantryItem.name}"></td>-->
+<!--                <td class="quantityInStock" th:text="${pantryItem.quantityInStock}"></td>-->
+<!--                <td class="reorderLevel" th:text="${pantryItem.reorderLevel}"></td>-->
+<!--            </tr>-->
+<!--            </tbody>-->
+<!--        </table>-->
+<!--    </div>-->
+<!--    &lt;!&ndash;end pantryView&ndash;&gt;-->
+<!--    <div class="view" id="pantryItemView" th:if="${view == 'pantryItemView'}">-->
+<!--        <table id="pantryItemDetails">-->
+<!--            <thead>-->
+<!--            <tr><th>Field</th><th>Value</th></tr>-->
+<!--            </thead>-->
+<!--            <tbody>-->
+<!--            <tr class="id"><td>Id</td><td th:text="${pantryItem.id}"></td></tr>-->
+<!--            <tr class="name"><td>Name</td><td th:text="${pantryItem.name}"></td></tr>-->
+<!--            <tr class="quantityInStock"><td>Quantity in Stock</td><td th:text="${pantryItem.quantityInStock}"></td></tr>-->
+<!--            <tr class="reorderLevel"><td>Reorder Level</td><td th:text="${pantryItem.reorderLevel}"></td></tr>-->
+<!--            </tbody>-->
+<!--        </table>-->
+<!--        <nav>-->
+<!--            <a th:href="@{/kitchen/pantry/form/{id}(id=${pantryItem.id})}">Edit</a>-->
+<!--            <a th:href="@{/kitchen/pantry/{id}/delete(id=${pantryItem.id})}">Delete</a>-->
+<!--        </nav>-->
+<!--    </div>-->
+<!--    &lt;!&ndash;end pantryItemView&ndash;&gt;-->
+<!--    <div class="view" id="pantryItemFormView" th:if="${view == 'pantryItemFormView'}">-->
+<!--        <form id="pantryItemForm"-->
+<!--          th:action="${pantryItem.id == null ? '/kitchen/pantry' : '/kitchen/pantry/' + pantryItem.id}"-->
+<!--          th:method="${pantryItem.id == null ? 'post' : 'put'}"-->
+<!--          th:object="${pantryItem}"-->
+<!--        >-->
+<!--            <fieldset>-->
+<!--                <label for="pantryItemId">Id</label>-->
+<!--                <input type="text" id="pantryItemId" name="id" readonly th:field="*{id}">-->
+<!--                <p th:if="${#fields.hasErrors('id')}" th:errorclass="error" th:errors="*{id}"></p>-->
+<!--            </fieldset>-->
+<!--            <fieldset>-->
+<!--                <label for="pantryItemName">Name</label>-->
+<!--                <input type="text" id="pantryItemName" required th:field="*{name}">-->
+<!--                <p th:if="${#fields.hasErrors('name')}" th:errorclass="error" th:errors="*{name}"></p>-->
+<!--            </fieldset>-->
+<!--            <fieldset>-->
+<!--                <label for="quantityInStock">Quantity In Stock</label>-->
+<!--                <input type="number" id="quantityInStock" min="0" max="200" required th:field="*{quantityInStock}">-->
+<!--                <p th:if="${#fields.hasErrors('quantityInStock')}" th:errorclass="error" th:errors="*{quantityInStock}"></p>-->
+<!--            </fieldset>-->
+<!--            <fieldset>-->
+<!--                <label for="reorderLevel">Reorder Threshold</label>-->
+<!--                <input type="number" id="reorderLevel" min="0" max="200" required th:field="*{reorderLevel}">-->
+<!--                <p th:if="${#fields.hasErrors('reorderLevel')}" th:errorclass="error" th:errors="*{reorderLevel}"></p>-->
+<!--            </fieldset>-->
+<!--            <fieldset>-->
+<!--                <input type="submit" value="Save">-->
+<!--            </fieldset>-->
+<!--        </form>-->
+<!--    </div>-->
+<!--    &lt;!&ndash;end pantryItemFormView&ndash;&gt;-->
+<!--    <div class="view" id="deletePantryItemView" th:if="${view == 'deletePantryItemView'}">-->
+<!--        <p class="warning" th:text="${#strings.isEmpty(warningMessage) ? 'Deletion removes all items referencing the item' : warningMessage}"></p>-->
+<!--        <form-->
+<!--            id="deletePantryItemForm"-->
+<!--            th:action="@{/kitchen/pantry/{id}/delete(id=${pantryItem.id})}"-->
+<!--            th:method="post"-->
+<!--            th:object="${pantryItem}">-->
+<!--            &lt;!&ndash;            <input type="hidden" name="_method" value="delete">&ndash;&gt;-->
+<!--            <fieldset class="actionGroup">-->
+<!--                <nav class="actionNav" id="deletePantryItemActionNav">-->
+<!--                    <a class="cancel" th:href="@{/kitchen/pantry/{id}(id=*{id})}" th:text="${'Do not Delete'}"></a>-->
+<!--                    <input type="submit" class="delete" id="deleteTaskButton" value="Delete Now">-->
+<!--                </nav>-->
+<!--            </fieldset>-->
+<!--        </form>-->
+<!--        &lt;!&ndash;end deletePantryItemView&ndash;&gt;-->
+<!--    </div>-->
+<!--</div>-->
+<!-- APPLICATION EXCEPTION DASHBOARD -->
+<div class="dashboard" id="exceptionDashboard" th:if="${dashboard == 'exceptionDashboard'}">
     <div class="view" id="itemNotFoundView" th:if="${view == 'itemNotFoundView'}">
         <h1>Item not Found</h1>
         The item you are looking for does not exist.
@@ -303,5 +391,7 @@
         <h1 th:text="${#strings.isEmpty(pageHeading) ? 'Error'  : errorMessage}"></h1>
         <p th:text="${#strings.isEmpty(errorMessage) ? 'An error occurred' : errorMessage}"></p>
     </div>
+</div>
+
 </body>
 </html>
