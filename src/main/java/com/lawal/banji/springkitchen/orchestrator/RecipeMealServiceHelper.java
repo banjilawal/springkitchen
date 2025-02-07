@@ -113,6 +113,8 @@ public class RecipeMealServiceHelper {
     @Transactional
     public void deleteFoodById(Long id) { foodService.deleteById(id); }
 
+    // Food Generating
+    public Food generateFood() { return foodService.generateFood(); }
 
     /* StepService Operations */
 

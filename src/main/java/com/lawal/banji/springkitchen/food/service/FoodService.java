@@ -1,5 +1,6 @@
 package com.lawal.banji.springkitchen.food.service;
 
+import com.lawal.banji.springkitchen.dataset.FoodNameDataset;
 import com.lawal.banji.springkitchen.food.model.Food;
 import com.lawal.banji.springkitchen.food.FoodRepo;
 import com.lawal.banji.springkitchen.food.service.exception.FoodServiceDeleteOperationFailed;
@@ -148,7 +149,7 @@ public class FoodService {
         }
     }
 
-    /* Delete methods */
+    /* Delete mMthods */
     @Transactional
     public void deleteById(Long id) {
         FoodServiceValidator.validateFoodServiceMethodLongParameter(id);
@@ -160,5 +161,14 @@ public class FoodService {
             AppLogger.error(FoodService.class, FoodServiceDeleteOperationFailed.MESSAGE + e.getMessage(), e);
             throw e;
         }
+    }
+
+    /* Generator Methods */
+    public Food generateFood () {
+        String name = FoodNameDataset.name();
+        while (findByName(name) != null) {
+            name = FoodNameDataset.name();
+        }
+        return new Food(null, name);
     }
 }

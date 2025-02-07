@@ -4,8 +4,15 @@ import com.lawal.banji.springkitchen.food.service.exception.FoodServiceRepoEmpty
 
 public class FoodControllerLoggingMessage {
 
-    public static final String SAVING_FOOD_MESSAGE = " Saving food: ";
-    public static final String SUCCESSFULLY_SAVE_FOOD = " Successfully saved food: ";
+    public static final String HTML_FOOD_CREATION_FORM_REQUEST = " Request for create a new food form: ";
+    public static final String PROCESSING_ADD_NEW_FOOD_REQUEST = " Processing add new food form: ";
+    public static final String SENDING_FOOD_ADDITION_RESPONSE_BODY = " Successfully the added new food ";
+
+    public static final String SENDING_FOOD_FORM_VIEW = " Sending food form in response body ";
+    public static final String HTML_FOOD_UPDATE_REQUEST_FORM = " Food update request form  update existing food form: ";
+    public static final String PROCESSING_UPDATE_FOOD_REQUEST = " Processing food update request for using @PathVariable: ";
+    public static final String SENDING_FOOD_NOT_FOUND_FOR_UPDATE_RESPONSE_BODY = " Food not found for update using @PathVariable ";
+    public static final String SENDING_FOOD_UPDATE_RESPONSE_BODY = " Successfully update food with id ";
 
     public static final String HTML_DELETE_FORM_REQUEST = " Food deletion form request for using id @pathVariable";
     public static final String PROCESSING_FOOD_DELETION_REQUEST = " Processing food deletion request for food id ";

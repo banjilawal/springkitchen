@@ -248,6 +248,10 @@ public class RecipeMealOrchestratorService {
         }
     }
 
+    public Food generateFood () {
+        return recipeMealServiceHelper.generateFood();
+    }
+
     /* Step Transactions */
     @Transactional
     public Step saveStep(Step step) {
@@ -329,6 +333,4 @@ public class RecipeMealOrchestratorService {
             throw e;
         }
     }
-
-
 }

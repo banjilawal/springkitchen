@@ -32,6 +32,7 @@
             <input type="submit" value="Search Pantry">
         </form>
     </nav>
+    <!-- Food List View -->
     <div class="view" id="foodListView" th:if="${view == 'foodListView'}">
         <table id="foodTable">
             <thead>
@@ -41,13 +42,25 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="food, iterStat: ${foods}" th:onclick="|location.href='@{/kitchen/food/{id}(id=${food.id})}'|">
+            <tr th:each="food, iterStat: ${foods}"
+                th:onclick="|location.href='@{/kitchen/food/{id}(id=${food.id})}'|"
+            >
                 <td class="id" th:text="${food.id}"></td>
                 <td class="name" th:text="${food.name}"></td>
             </tr>
             </tbody>
         </table>
+        <!-- Pagination Support -->
+<!--        <nav class="pagination" th:if="${foods.totalPages > 1}">-->
+<!--        <span th:each="page : ${#numbers.sequence(1, foods.totalPages)}">-->
+<!--            <a th:href="@{/kitchen/food/list(page=${page - 1})}"-->
+<!--               th:text="${page}"-->
+<!--               th:classappend="${foods.number + 1 == page} ? 'active'">-->
+<!--            </a>-->
+<!--        </span>-->
+<!--        </nav>-->
     </div>
+    <!--    Food Details View-->
     <div class="view" id="foodView" th:if="${view == 'foodView'}">
         <table id="foodDetails">
             <thead>
@@ -63,6 +76,7 @@
             <a th:href="@{/kitchen/food/{id}/delete(id=${food.id})}">Delete</a>
         </nav>
     </div>
+    <!-- Food Form View -->
     <div class="view" id="foodFormView" th:if="${view == 'foodFormView'}">
         <form id="foodForm"
             th:action="${food.id == null ? '/kitchen/food' : '/kitchen/food/' + food.id}"
