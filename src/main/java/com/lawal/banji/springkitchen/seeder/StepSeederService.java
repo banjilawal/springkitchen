@@ -49,7 +49,7 @@ public class StepSeederService {
                 Long durationMinutes = getMinutes(timeStringExtractor(directions));
                 food = ingredient(recipe);
                 ingredientAmount = ingredientAmount();
-                Step step = new Step(null, recipe, food, ingredientAmount, directions, durationMinutes);
+                Step step = new Step(null, recipe, food, directions );
                 stepService.save(step);
                 foodService.save(food);
                 recipeService.save(recipe);
@@ -66,8 +66,8 @@ public class StepSeederService {
     }
 
     private String directions (Recipe recipe) {
-        String directions = StepStatementDataset.statement();
-        while (recipe.filterStepsByDirections(directions) != null) directions = StepStatementDataset.statement();
+        String directions = StepStatementDataset.instruction();
+        while (recipe.filterStepsByDirections(directions) != null) directions = StepStatementDataset.instruction();
         return directions;
     }
 

@@ -11,13 +11,4 @@ import java.util.Set;
 
 @Repository
 public interface StepRepo extends JpaRepository<Step, Long> {
-
-    void deleteAllByRecipe(Recipe recipe);
-
-    @Query("SELECT s FROM Step s WHERE LOWER(s.directions) LIKE LOWER(CONCAT('%', :string, '%'))")
-    Set<Step> findByDirectionsContainingIgnoreCase(@Param("string") String string);
-
-    Set<Step> searchByDirectionsContainingIgnoreCase(String string);
 }
-
-

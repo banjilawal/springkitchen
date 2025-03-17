@@ -2,13 +2,9 @@ package com.lawal.banji.springkitchen.step.service;
 
 
 import com.lawal.banji.springkitchen.food.model.Food;
-import com.lawal.banji.springkitchen.global.AppLogger;
+import com.lawal.banji.springkitchen.common.AppLogger;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
 
-import com.lawal.banji.springkitchen.recipe.service.RecipeService;
-import com.lawal.banji.springkitchen.recipe.service.RecipeServiceLoggingMessage;
-import com.lawal.banji.springkitchen.recipe.service.RecipeServiceValidator;
-import com.lawal.banji.springkitchen.recipe.service.exception.RecipeServiceDeleteOperationFailed;
 import com.lawal.banji.springkitchen.step.StepRepo;
 import com.lawal.banji.springkitchen.step.model.Step;
 import com.lawal.banji.springkitchen.step.service.exception.StepServiceDeleteOperationFailed;
@@ -129,7 +125,7 @@ public class StepService {
         if (string != null && !string.isBlank()) {
             string = string.toLowerCase();
             for (Step step : stepRepo.findAll()) {
-                if (step.getDirections().toLowerCase().contains(string)) matches.add(step);
+                if (step.getInstruction().toLowerCase().contains(string)) matches.add(step);
             }
         }
         AppLogger.info(StepService.class, matches.size() + StepServiceLoggingMessage.TOTAL_MATCHES_TO_STRING_FOUND_MESSAGE + string);
@@ -188,6 +184,18 @@ public class StepService {
         StepServiceValidator.validateLongMethodParameter(id);
         AppLogger.debug(StepService.class, StepServiceLoggingMessage.DELETING_STEP_MESSAGE);
         try {
+            Step step = findById(id);
+            if (step == null) {
+                System.out.println("No step with id to delete");
+                return;
+            }
+            Recipe recipe = step.getRecipe();
+            Food ingredient = step.getIngredient();
+
+            if (recipe != null) recipe.removeStep(step);
+            if (ingredient != null) ingredient.removeStep(step);
+
+
             stepRepo.deleteById(id);
             AppLogger.info(StepService.class, StepServiceLoggingMessage.SUCCESSFULLY_DELETED_STEP);
         } catch (DataAccessException e) {
@@ -203,12 +211,8 @@ public class StepService {
             logger.error(METHOD_DOES_NOT_ALLOW_NULL_STEP_AS_PARAMETER);
             return false;
         }
-        if (step.getDirections() == null || step.getDirections().isEmpty()) {
+        if (step.getInstruction() == null || step.getInstruction().isEmpty()) {
             logger.error(Step.STEP_DIRECTIONS_CANNOT_BE_NULL_OR_BLANK);
-            return false;
-        }
-        if (step.getIngredientAmount() < 0) {
-            logger.error(Step.STEP_INGREDIENT_AMOUNT_CANNOT_BE_NEGATIVE);
             return false;
         }
         return true;

@@ -1,22 +1,22 @@
-package com.lawal.banji.springkitchen.orchestrator;
+package com.lawal.banji.springkitchen.common;
 
 import com.lawal.banji.springkitchen.food.model.Food;
-import com.lawal.banji.springkitchen.global.AppLogger;
-import com.lawal.banji.springkitchen.meal.MealService;
+import com.lawal.banji.springkitchen.meal.model.Meal;
+import com.lawal.banji.springkitchen.meal.service.MealService;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
 import com.lawal.banji.springkitchen.step.model.Step;
 import com.lawal.banji.springkitchen.food.service.FoodService;
 import com.lawal.banji.springkitchen.recipe.service.RecipeService;
 import com.lawal.banji.springkitchen.step.service.StepService;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
 
 @Service
-public class RecipeMealServiceHelper {
+public class ServiceFacade {
 
     private final StepService stepService;
     private final MealService mealService;
@@ -25,16 +25,16 @@ public class RecipeMealServiceHelper {
 
 
     @Autowired
-    public RecipeMealServiceHelper(
+    public ServiceFacade (
+        FoodService foodService,
         StepService stepService,
         MealService mealService,
-        RecipeService recipeService,
-        FoodService foodService
+        RecipeService recipeService
     ) {
+        this.foodService = foodService;
         this.stepService = stepService;
         this.mealService = mealService;
         this.recipeService = recipeService;
-        this.foodService = foodService;
     }
 
     /* RecipeService Operations */
@@ -64,9 +64,6 @@ public class RecipeMealServiceHelper {
     @Transactional(readOnly = true)
     public Set<Recipe> searchRecipes (String string) { return recipeService.search(string); }
 
-    @Transactional(readOnly = true)
-    public Recipe getRandomRecipe() { return recipeService.randomRecipe(); }
-
     // Recipe Updating
     @Transactional
     public Recipe updateRecipe(Long targetId, Recipe source) { return recipeService.update(targetId, source); }
@@ -80,7 +77,7 @@ public class RecipeMealServiceHelper {
     // Food Creating
     @Transactional
     public Food saveFood(Food food) {
-        AppLogger.debug(RecipeMealServiceHelper.class, "saveFood() called with: food = [" + food + "]");
+        AppLogger.debug(ServiceFacade.class, "saveFood() called with: food = [" + food + "]");
         return foodService.save(food);
     }
 
@@ -100,8 +97,8 @@ public class RecipeMealServiceHelper {
     @Transactional(readOnly = true)
     public Set<Food> searchFoods(String string) { return foodService.search(string); }
 
-    @Transactional(readOnly = true)
-    public Food getRandomFood() { return foodService.randomFood(); }
+//    @Transactional(readOnly = true)
+//    public Food getRandomFood() { return foodService.randomFood(); }
 
     // Food Updating
     @Transactional
@@ -145,4 +142,24 @@ public class RecipeMealServiceHelper {
     // Step Deleting
     @Transactional
     public void deleteStepById(Long id) { stepService.deleteById(id); }
+
+    /* MealService Operations */
+
+    // Recipe Reading
+
+    @Transactional
+    public Meal saveMeal(Meal meal) { return mealService.save(meal);}
+
+    @Transactional
+    public void deleteMealById(Long id) { mealService.deleteById(id); }
+
+    @Transactional(readOnly = true)
+    public Long countMeals() { return mealService.count(); }
+
+    @Transactional(readOnly = true)
+    public Meal findMealById(Long id) { return mealService.findById(id); }
+
+    @Transactional(readOnly = true)
+    public List<Meal> findAllMeals () { return mealService.findAll(); }
+
 }

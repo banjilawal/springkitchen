@@ -1,25 +1,31 @@
 package com.lawal.banji.springkitchen.food.model;
 
 import com.lawal.banji.springkitchen.food.model.exception.FoodNameNullException;
-import com.lawal.banji.springkitchen.global.AppLogger;
-import com.lawal.banji.springkitchen.meal.Meal;
+import com.lawal.banji.springkitchen.common.AppLogger;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
 import com.lawal.banji.springkitchen.step.model.Step;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 
 import java.util.*;
 
+@Data
 @Entity
+@NoArgsConstructor
 @Table(name = "foods")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Food {
 
     @Id
+    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.AUTO)
     Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     @NotBlank(message = FoodNameNullException.MESSAGE)
     String name;
 
@@ -27,8 +33,6 @@ public class Food {
     @OneToMany(mappedBy = "ingredient", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Step> steps = new HashSet<>();
 
-    /* Constructors */
-    public Food() {}
 
     public Food(Long id, String name) { //}, Step step) {
         setId(id);
@@ -36,16 +40,11 @@ public class Food {
         this.steps = new HashSet<>();
     }
 
-    /* Getters */
     public Long getId() { return id; }
 
     public String getName() { return name; }
 
-    public List<Step> getSteps() { return getStepsAsList(); }
-
-    public List<Step> getStepsAsList() { return new ArrayList<>(steps); }
-
-    public Set<Step> getStepsAsSet() { return new HashSet<>(steps); }
+    public Set<Step> getStepsSet() { return steps; }
 
     /* Setters */
     public void setId(Long id) {
@@ -63,12 +62,18 @@ public class Food {
     }
 
     // Step mutator methods
+    public Set<Step> getSteps() {
+        AppLogger.debug(Food.class, "Getting steps");
+//        FoodValidator.validateFoodSteps(this);
+        return steps;
+    }
+
     public void setSteps(Set<Step> steps) {
         AppLogger.debug(Food.class, "Setting steps");
         FoodValidator.validateFoodMethodStepSetParameter(steps);
         if (this.steps == null) this.steps = new HashSet<>();
         this.steps.clear();
-        steps.forEach(this::addStep);
+        for (Step step : steps) { addStep(step); }
         AppLogger.info(Food.class, "Successfully set steps");
     }
 
@@ -110,26 +115,6 @@ public class Food {
         return null;
     }
 
-    // Step filtration methods
-    public Set<Step> filterStepsByDirections(String string) {
-        Set<Step> matches = new HashSet<>();
-        AppLogger.debug(Food.class, "Filtering steps by directions " + string);
-        if (steps == null) steps = new HashSet<>();
-        if (string != null && !string.isBlank()) {
-            string = string.toLowerCase();
-            for (Step step : steps) {
-                if (step.getDirections().toLowerCase().contains(string) ||
-                    step.getIngredient().getName().toLowerCase().contains(string)
-                ) {
-                    AppLogger.info(Food.class, "Successfully filtered step by directions " + string);
-                    matches.add(step);
-                }
-            }
-        }
-        return matches;
-    }
-
-    // getRecipes
     public Set<Recipe> getRecipes() {
         Set<Recipe> recipes = new HashSet<>();
         AppLogger.debug(Food.class, "Getting recipes associated with the steps of this food. ");
@@ -141,39 +126,37 @@ public class Food {
         return recipes;
     }
 
-    public Set<Meal> getMeals () {
-        Set<Meal> meals = new HashSet<>();
-        for (Recipe recipe : getRecipes()) {
-            meals.addAll(recipe.getMealsAsSet());
-        }
-        return meals;
-    }
-
     /* Update methods */
     public void getUpdate(Food source) {
-        FoodValidator.validateUpdatePair(this, source);
+//        FoodValidator.validateUpdatePair(this, source);
         if (source == this) return;
         setName(source.getName());
-        setSteps(source.getStepsAsSet());
+        setSteps(source.getSteps());
     }
-
-    /* Equals and hash methods */
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null) return false;
-        if (object instanceof Food food) {
-            boolean equalIds = id != null && food.getId() != null && id.equals(food.getId());
-            boolean equalNames = name != null && food.getName() != null && name.equalsIgnoreCase(food.getName());
-            return equalIds && equalNames;
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() { return id != null ? Objects.hash(id) : Objects.hash(name); }
 
     /* String methods */
+    public String stepsToString() {
+        StringBuilder stringBuilder = new StringBuilder("Steps:");
+        if (steps == null) {
+            steps = new HashSet<>();
+            return "steps:0";
+        } else {
+            int counter = 1;
+            for (Step step : steps) {
+                stringBuilder.append(counter)
+                    .append(" stepId:")
+                    .append(step.getId())
+                    .append(" recipeId:")
+                    .append(step.getRecipe())
+                    .append("\n");
+                counter++;
+            }
+        }
+        return stringBuilder.toString();
+    }
+
     @Override
-    public String toString() { return getClass().getSimpleName() + "[id:" + id + " name:" + name + "]"; }
+    public String toString() {
+        if (this == null) return "null food";
+        return getClass().getSimpleName() + "[id:" + id + " name:" + name + " total steps:" + steps.size() + "]"; }
 }

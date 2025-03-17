@@ -1,10 +1,10 @@
-package com.lawal.banji.springkitchen.global;
+package com.lawal.banji.springkitchen.common;
 
 import com.lawal.banji.springkitchen.food.model.Food;
 import com.lawal.banji.springkitchen.food.service.exception.*;
-import com.lawal.banji.springkitchen.global.exception.NullIdException;
-import com.lawal.banji.springkitchen.global.exception.NullNameException;
-import com.lawal.banji.springkitchen.global.exception.NullStepSetException;
+import com.lawal.banji.springkitchen.common.exception.NullIdException;
+import com.lawal.banji.springkitchen.common.exception.NullNameException;
+import com.lawal.banji.springkitchen.common.exception.NullStepSetException;
 import com.lawal.banji.springkitchen.step.model.Step;
 
 import java.util.Set;

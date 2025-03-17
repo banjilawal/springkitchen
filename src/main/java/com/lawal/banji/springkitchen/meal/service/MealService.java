@@ -1,17 +1,20 @@
-package com.lawal.banji.springkitchen.meal;
+package com.lawal.banji.springkitchen.meal.service;
 
+import com.lawal.banji.springkitchen.meal.MealRepo;
+import com.lawal.banji.springkitchen.meal.model.Meal;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
 public class MealService {
 
-    @Autowired
-    private MealRepo mealRepo;
+    private final MealRepo mealRepo;
 
     @Autowired
     public MealService(MealRepo mealRepo) {
@@ -27,6 +30,16 @@ public class MealService {
             if (meal.getRecipe() != null) meal.getRecipe().addMeal(meal);
         }
         return mealRepo.save(meal);
+    }
+
+    @Transactional
+    public Meal update (Long targetId, Meal source) {
+        Meal target = findById(targetId);
+        if (target != null) {
+            target.getUpdate(source);
+            return save(target);
+        }
+        return null;
     }
 
     public Meal findById(Long id) {
@@ -51,6 +64,28 @@ public class MealService {
             mealRepo.deleteById(id);
         }
         return recipe;
+    }
+
+    public List<Meal> filterByRecipe(Recipe recipe) {
+        List<Meal> matches = new ArrayList<>();
+
+        if (recipe == null) return matches;
+
+        for (Meal meal : findAll()) {
+            if (meal.getRecipe() != null && meal.getRecipe().equals(recipe) && !matches.contains(meal)) matches.add(meal);
+        }
+        return matches;
+    }
+
+    public List<Meal> filterByTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+        List<Meal> matches = new ArrayList<>();
+
+        if (startTime == null || endTime == null) return matches;
+
+        for (Meal meal : findAll()) {
+            if (meal.isInDateRange(startTime, endTime) && !matches.contains(meal)) matches.add(meal);
+        }
+        return matches;
     }
 
 

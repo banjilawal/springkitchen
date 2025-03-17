@@ -1,6 +1,6 @@
 package com.lawal.banji.springkitchen.food.service;
 
-import com.lawal.banji.springkitchen.food.service.exception.FoodServiceRepoEmptyOrNull;
+import com.lawal.banji.springkitchen.food.service.exception.FoodRepoEmptyOrNull;
 
 public class FoodServiceLoggingMessage {
 
@@ -39,5 +39,5 @@ public class FoodServiceLoggingMessage {
     public static final String RANDOMLY_SELECTING_FOOD_MESSAGE = " Randomly selecting a food: ";
     public static final String SELECTED_RANDOM_FOOD_MESSAGE = " selected random food: ";
     public static final String FAILED_TO_GET_RANDOM_FOOD_FROM_NONEMPTY_REPO_MESSAGE = " None of the foods in the nonempty food repo were selected";
-    public static final String NO_RANDOM_FOOD_AVAILABLE_MESSAGE = FoodServiceRepoEmptyOrNull.MESSAGE + " No food available to pick randomly";
+    public static final String NO_RANDOM_FOOD_AVAILABLE_MESSAGE = FoodRepoEmptyOrNull.MESSAGE + " No food available to pick randomly";
 }

@@ -4,14 +4,12 @@ import com.lawal.banji.springkitchen.dataset.FoodNameDataset;
 import com.lawal.banji.springkitchen.food.model.Food;
 import com.lawal.banji.springkitchen.food.FoodRepo;
 import com.lawal.banji.springkitchen.food.service.exception.FoodServiceDeleteOperationFailed;
-import com.lawal.banji.springkitchen.food.service.exception.FoodServiceRepoEmptyOrNull;
+import com.lawal.banji.springkitchen.food.service.exception.FoodRepoEmptyOrNull;
 import com.lawal.banji.springkitchen.food.service.exception.FoodServiceSaveOperationFailed;
 import com.lawal.banji.springkitchen.food.service.exception.FoodServiceUpdateExceptionTargetNotFound;
-import com.lawal.banji.springkitchen.global.AppLogger;
+import com.lawal.banji.springkitchen.common.AppLogger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +19,6 @@ import java.util.*;
 public class FoodService {
 
     private static final Random random = new Random();
-    private static final Logger logger = LoggerFactory.getLogger(FoodService.class);
 
     private final FoodRepo foodRepo;
 
@@ -33,14 +30,20 @@ public class FoodService {
     /* Create methods */
     @Transactional
     public Food save (Food food) {
-       FoodServiceValidator.validateSaveFoodParameter(food);
-       AppLogger.debug(FoodService.class, FoodServiceLoggingMessage.SAVING_FOOD_MESSAGE);
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+
+//       FoodServiceValidator.validateSaveFoodParameter(food);
+       if (food == null || food.getName().isBlank() || food.getName() == null) return null;
+       AppLogger.debug(FoodService.class, methodName + ":" + FoodServiceLoggingMessage.SAVING_FOOD_MESSAGE);
        try {
            Food savedFood = foodRepo.save(food);
-           AppLogger.info(FoodService.class, FoodServiceLoggingMessage.SUCCESSFULLY_SAVE_FOOD + savedFood.toString());
+           AppLogger.info(FoodService.class, methodName + ":" +FoodServiceLoggingMessage.SUCCESSFULLY_SAVE_FOOD + savedFood.toString());
            return savedFood;
         } catch (DataAccessException e) {
-           AppLogger.error(FoodService.class, String.format(FoodServiceSaveOperationFailed.MESSAGE + e.getMessage()), e);
+           AppLogger.error(
+               FoodService.class,
+               methodName + ":" + String.format(FoodServiceSaveOperationFailed.MESSAGE + e.getMessage()), e
+           );
            throw e;
         }
     }
@@ -48,14 +51,24 @@ public class FoodService {
     /* Read methods */
     @Transactional(readOnly = true)
     public Long count() {
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+
         Long totalFoods = foodRepo.count();
-        AppLogger.info(FoodService.class, totalFoods + FoodServiceLoggingMessage.NUMBER_OF_FOODS_MESSAGE);
+        AppLogger.info(
+            FoodService.class,
+            methodName
+                + ":" + totalFoods
+                + " " + FoodServiceLoggingMessage.NUMBER_OF_FOODS_MESSAGE
+        );
         return totalFoods;
     }
 
     @Transactional(readOnly = true)
     public Food findById(Long id) {
-        FoodServiceValidator.validateFoodServiceMethodLongParameter(id);
+
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+                FoodServiceValidator.validateFoodServiceMethodLongParameter(id);
+
         AppLogger.debug(FoodService.class, FoodServiceLoggingMessage.FINDING_FOOD_BY_ID_MESSAGE + id);
         Food food = foodRepo.findById(id).orElse(null);
         if (food == null) {
@@ -105,8 +118,8 @@ public class FoodService {
         AppLogger.debug(FoodService.class, FoodServiceLoggingMessage.RANDOMLY_SELECTING_FOOD_MESSAGE);
         int count = (int) foodRepo.count();
         if (count == 0) {
-            AppLogger.error(FoodService.class, FoodServiceRepoEmptyOrNull.MESSAGE, new FoodServiceRepoEmptyOrNull());
-            throw new FoodServiceRepoEmptyOrNull();
+            AppLogger.error(FoodService.class, FoodRepoEmptyOrNull.MESSAGE, new FoodRepoEmptyOrNull());
+            throw new FoodRepoEmptyOrNull();
         }
         Food food = foodRepo.findAll().get(random.nextInt(0, count));
         if (food == null) {

@@ -1,6 +1,6 @@
 package com.lawal.banji.springkitchen.recipe.model.exception;
 
-import com.lawal.banji.springkitchen.global.exception.EndTimeBeforeStartTimeToException;
+import com.lawal.banji.springkitchen.common.exception.EndTimeBeforeStartTimeToException;
 
 public class RecipeFilterMealsByDateRangeEndTimeBeforeStartTimeException extends RuntimeException {
 

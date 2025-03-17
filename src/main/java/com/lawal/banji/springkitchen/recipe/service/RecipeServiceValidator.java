@@ -1,6 +1,6 @@
 package com.lawal.banji.springkitchen.recipe.service;
 
-import com.lawal.banji.springkitchen.meal.Meal;
+import com.lawal.banji.springkitchen.meal.model.Meal;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
 import com.lawal.banji.springkitchen.recipe.model.exception.*;
 import com.lawal.banji.springkitchen.recipe.service.exception.*;

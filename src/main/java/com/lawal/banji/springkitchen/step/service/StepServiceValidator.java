@@ -11,7 +11,7 @@ public class StepServiceValidator {
         if (step == null) {
             throw new StepServiceSaveExceptionStepNull();
         }
-        if (step.getDirections() == null || step.getDirections().isBlank()) {
+        if (step.getInstruction() == null || step.getInstruction().isBlank()) {
             throw new StepServiceSaveExceptionDirectionsNull();
         }
     }
@@ -26,7 +26,7 @@ public class StepServiceValidator {
         if (source.getId() == null) {
             throw new StepServiceUpdateExceptionSourceIdNull();
         }
-        if (source.getDirections() == null || source.getDirections().isBlank()) {
+        if (source.getInstruction() == null || source.getInstruction().isBlank()) {
             throw new StepServiceUpdateExceptionSourceDirectionsNull();
         }
         if (!targetId.equals(source.getId())) {

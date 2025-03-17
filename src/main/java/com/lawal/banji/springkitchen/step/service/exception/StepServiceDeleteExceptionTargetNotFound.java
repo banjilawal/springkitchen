@@ -13,9 +13,9 @@ public class StepServiceDeleteExceptionTargetNotFound extends RuntimeException {
     }
 
     private static String getMessage(Step step) {
-        if (step == null || step.getDirections() == null || step.getDirections().isBlank()) {
+        if (step == null || step.getInstruction() == null || step.getInstruction().isBlank()) {
             return MESSAGE;
         }
-        return String.format(MESSAGE_TEMPLATE, step.getDirections().trim());
+        return String.format(MESSAGE_TEMPLATE, step.getInstruction().trim());
     }
 }

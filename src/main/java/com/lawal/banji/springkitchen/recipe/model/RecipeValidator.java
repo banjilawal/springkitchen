@@ -1,9 +1,9 @@
 package com.lawal.banji.springkitchen.recipe.model;
 
 import com.lawal.banji.springkitchen.food.model.Food;
-import com.lawal.banji.springkitchen.global.GlobalValidator;
-import com.lawal.banji.springkitchen.global.exception.NullLocalDateTimePassedToMethod;
-import com.lawal.banji.springkitchen.meal.Meal;
+import com.lawal.banji.springkitchen.common.GlobalValidator;
+import com.lawal.banji.springkitchen.common.exception.NullLocalDateTimePassedToMethod;
+import com.lawal.banji.springkitchen.meal.model.Meal;
 import com.lawal.banji.springkitchen.recipe.model.exception.*;
 import com.lawal.banji.springkitchen.step.model.Step;
 

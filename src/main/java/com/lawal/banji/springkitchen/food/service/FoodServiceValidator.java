@@ -3,7 +3,7 @@ package com.lawal.banji.springkitchen.food.service;
 import com.lawal.banji.springkitchen.food.model.*;
 import com.lawal.banji.springkitchen.food.model.exception.*;
 import com.lawal.banji.springkitchen.food.service.exception.*;
-import com.lawal.banji.springkitchen.global.AppLogger;
+import com.lawal.banji.springkitchen.common.AppLogger;
 import com.lawal.banji.springkitchen.step.model.Step;
 
 import java.util.Set;

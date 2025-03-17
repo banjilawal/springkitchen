@@ -1,7 +1,7 @@
 package com.lawal.banji.springkitchen.recipe.service;
 
 
-import com.lawal.banji.springkitchen.recipe.service.exception.RecipeServiceRepoEmptyOrNull;
+import com.lawal.banji.springkitchen.recipe.service.exception.RecipeRepoEmptyOrNull;
 
 public class RecipeServiceLoggingMessage {
 
@@ -45,5 +45,5 @@ public class RecipeServiceLoggingMessage {
     public static final String RANDOMLY_SELECTING_RECIPE_MESSAGE = " Randomly selecting a recipe: ";
     public static final String SELECTED_RANDOM_RECIPE_MESSAGE = " selected random recipe: ";
     public static final String FAILED_TO_GET_RANDOM_RECIPE_FROM_NONEMPTY_REPO_MESSAGE = " None of the recipes in the nonempty recipe repo were selected";
-    public static final String NO_RANDOM_RECIPE_AVAILABLE_MESSAGE = RecipeServiceRepoEmptyOrNull.MESSAGE + " No recipe available to pick randomly";
+    public static final String NO_RANDOM_RECIPE_AVAILABLE_MESSAGE = RecipeRepoEmptyOrNull.MESSAGE + " No recipe available to pick randomly";
 }

@@ -1,4 +1,4 @@
-package com.lawal.banji.springkitchen.global.exception;
+package com.lawal.banji.springkitchen.common.exception;
 
 public class NullIdException extends RuntimeException {
 

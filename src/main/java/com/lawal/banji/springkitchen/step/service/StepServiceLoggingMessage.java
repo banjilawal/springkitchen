@@ -1,7 +1,7 @@
 package com.lawal.banji.springkitchen.step.service;
 
 
-import com.lawal.banji.springkitchen.step.service.exception.StepServiceRepoEmptyOrNull;
+import com.lawal.banji.springkitchen.step.service.exception.StepRepoEmptyOrNull;
 
 public class StepServiceLoggingMessage {
 
@@ -47,7 +47,7 @@ public class StepServiceLoggingMessage {
     public static final String RANDOMLY_SELECTING_STEP_MESSAGE = " Randomly selecting a step: ";
     public static final String SELECTED_RANDOM_STEP_MESSAGE = " selected random step: ";
     public static final String FAILED_TO_GET_RANDOM_STEP_FROM_NONEMPTY_REPO_MESSAGE = " None of the steps in the nonempty step repo were selected";
-    public static final String NO_RANDOM_STEP_AVAILABLE_MESSAGE = StepServiceRepoEmptyOrNull.MESSAGE + " No step available to pick randomly";
+    public static final String NO_RANDOM_STEP_AVAILABLE_MESSAGE = StepRepoEmptyOrNull.MESSAGE + " No step available to pick randomly";
 
     public static final String SELECTING_STEPS_BY_INGREDIENT_MESSAGE = " Selecting steps by ingredient: ";
     public static final String SELECTED_STEPS_BY_INGREDIENT_MESSAGE = " selected steps by ingredient: ";

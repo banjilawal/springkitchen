@@ -1,6 +1,5 @@
 package com.lawal.banji.springkitchen.step.model;
 
-import com.lawal.banji.springkitchen.meal.Meal;
 import com.lawal.banji.springkitchen.step.model.exception.*;
 
 import java.util.Set;
@@ -20,7 +19,7 @@ public class StepValidator {
         if (source.getId() == null) {
             throw new StepUpdateSourceNullIdException();
         }
-        if (source.getDirections() == null || source.getDirections().isBlank()) {
+        if (source.getInstruction() == null || source.getInstruction().isBlank()) {
             throw new StepUpdateSourceNullDirectionsException();
         }
     }

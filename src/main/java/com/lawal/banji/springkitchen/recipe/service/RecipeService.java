@@ -1,6 +1,6 @@
 package com.lawal.banji.springkitchen.recipe.service;
 
-import com.lawal.banji.springkitchen.global.AppLogger;
+import com.lawal.banji.springkitchen.common.AppLogger;
 
 import com.lawal.banji.springkitchen.recipe.RecipeRepo;
 import com.lawal.banji.springkitchen.recipe.model.Recipe;
@@ -57,12 +57,18 @@ public class RecipeService {
     @Transactional(readOnly = true)
     public Recipe findById(Long id) {
         RecipeServiceValidator.validateRecipeServiceMethodLongParameter(id);
-        AppLogger.debug(RecipeService.class, RecipeServiceLoggingMessage.FINDING_RECIPE_BY_ID_MESSAGE + id);
+        AppLogger.debug(
+            RecipeService.class,
+            RecipeServiceLoggingMessage.FINDING_RECIPE_BY_ID_MESSAGE + id
+        );
         Recipe recipe = recipeRepo.findById(id).orElse(null);
         if (recipe == null) {
             AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.RECIPE_NOT_FOUND_BY_ID_MESSAGE + id);
         } else {
-            AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.FOUND_RECIPE_BY_ID_MESSAGE + recipe.toString());
+            AppLogger.info(
+                RecipeService.class,
+                RecipeServiceLoggingMessage.FOUND_RECIPE_BY_ID_MESSAGE + recipe.toString()
+            );
         }
         return recipe;
     }
@@ -120,20 +126,6 @@ public class RecipeService {
     }
 
     @Transactional(readOnly = true)
-    public Recipe randomRecipe() {
-        long count = count();
-        Recipe recipe = recipeRepo.findAll().get(random.nextInt((int) count));
-        if (count == 0) {
-            AppLogger.debug(RecipeService.class, RecipeServiceLoggingMessage.NO_RANDOM_RECIPE_AVAILABLE_MESSAGE);
-        } else if (recipe == null) {
-            AppLogger.debug(RecipeService.class, RecipeServiceLoggingMessage.FAILED_TO_GET_RANDOM_RECIPE_FROM_NONEMPTY_REPO_MESSAGE);
-        } else {
-            AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.RANDOMLY_SELECTING_RECIPE_MESSAGE + recipe.toString());
-        }
-        return recipe;
-    }
-
-    @Transactional(readOnly = true)
     public String toString () {
         StringBuilder stringBuilder = new StringBuilder();
         for (Recipe recipe : recipeRepo.findAll()) {
@@ -168,6 +160,8 @@ public class RecipeService {
         RecipeServiceValidator.validateRecipeServiceMethodLongParameter(id);
         AppLogger.debug(RecipeService.class, RecipeServiceLoggingMessage.DELETING_RECIPE_MESSAGE);
         try {
+            Recipe recipe = findById(id);
+            if (recipe == null) return;
             recipeRepo.deleteById(id);
             AppLogger.info(RecipeService.class, RecipeServiceLoggingMessage.SUCCESSFULLY_DELETE_RECIPE);
         } catch (DataAccessException e) {
